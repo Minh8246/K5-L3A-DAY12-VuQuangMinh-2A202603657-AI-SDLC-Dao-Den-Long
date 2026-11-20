@@ -45,7 +45,7 @@ function nextId(g, prefix, list) {
 const pick = (g, arr) => arr[Math.floor(g.rng() * arr.length)];
 
 // ---------- dựng Đêm ----------
-export function createGame({ seed = 0, night = 1, scenario = null } = {}) {
+export function createGame({ seed = 0, night = 1, scenario = null, bench = false } = {}) {
   const map = MAPS[night];
   if (!map) throw new FormatError(`night ${night} không tồn tại`);
   const sc = scenario ?? {};
@@ -53,6 +53,7 @@ export function createGame({ seed = 0, night = 1, scenario = null } = {}) {
     seed,
     night,
     map,
+    bench, // Ticket-04 §1: cảnh benchmark — tắt sinh thêm, sát thương, nhặt, hao dầu, kết thúc Đêm
     rng: createRng(seed),
     tick: 0,
     simTick: 0,
@@ -356,8 +357,8 @@ function runStep(g, input, emit) {
     g.wind = { active: true, dirDeg: round3(g.rng() * 360), ticksLeft: W.wind_ticks };
   }
   // 2b. Dầu (Ticket-03): hao 1/giây + bị hút 5/giây cho mỗi Bóng Mực đang drain
-  for (const L of g.lanterns) if (L.lit) L.fuelU -= DECAY_U;
-  for (const s of byId(g.shades)) {
+  if (!g.bench) for (const L of g.lanterns) if (L.lit) L.fuelU -= DECAY_U;
+  for (const s of g.bench ? [] : byId(g.shades)) {
     if (shadeState(s) !== 'drain') continue;
     const L = g.lanterns.find((l) => l.id === s.targetLantern);
     if (!L || !L.lit) continue;
@@ -390,7 +391,7 @@ function runStep(g, input, emit) {
   }
 
   // 4. Nhặt đom đóm và bùa
-  if (p.fallWaitTicks === 0) {
+  if (p.fallWaitTicks === 0 && !g.bench) {
     for (const m of byId(g.motes)) {
       if (p.carried >= capacityOf(p)) break;
       if (distXZ(p.pos, m.pos) <= T.pickup_radius + EPS && Math.abs(p.pos[1] - m.pos[1]) <= W.pickup_dy + EPS) {
@@ -580,7 +581,7 @@ function runStep(g, input, emit) {
   }
 
   // 9. Chạm: Gió Lạc cướp trước, rồi Bóng Mực (id tăng dần)
-  if (!playerAway) {
+  if (!playerAway && !g.bench) {
     for (const d of byId(g.drifters)) {
       if ((d.state !== 'idle' && d.state !== 'chase') || d.stoleOnce || p.carried <= 0) continue;
       if (distXZ(d.pos, p.pos) <= W.drifter_touch + EPS) {
@@ -610,7 +611,7 @@ function runStep(g, input, emit) {
   }
 
   // 10. Sinh theo lịch (thực thể mới chỉ tương tác từ tick sau)
-  if (g.randomMotes && g.simTick % W.mote_spawn_every === 0) {
+  if (!g.bench && g.randomMotes && g.simTick % W.mote_spawn_every === 0) {
     const randomCount = g.motes.filter((m) => m.kind === 'random').length;
     if (randomCount < W.mote_cap) {
       const taken = new Set(g.motes.filter((m) => m.point !== null).map((m) => m.point));
@@ -621,7 +622,7 @@ function runStep(g, input, emit) {
       }
     }
   }
-  if (g.randomShades && g.simTick >= W.shade_first_spawn && (g.simTick - W.shade_first_spawn) % map.shadeEvery === 0) {
+  if (!g.bench && g.randomShades && g.simTick >= W.shade_first_spawn && (g.simTick - W.shade_first_spawn) % map.shadeEvery === 0) {
     const n = g.simTick === W.shade_first_spawn ? 2 : 1;
     const used = [];
     for (let i = 0; i < n && g.shades.length < map.shadeMax; i++) {
@@ -639,7 +640,7 @@ function runStep(g, input, emit) {
       emit('shade_spawned', { id: s.id });
     }
   }
-  if (g.randomDrifters && g.simTick % W.drifter_every === 0) {
+  if (!g.bench && g.randomDrifters && g.simTick % W.drifter_every === 0) {
     const alive = g.drifters.filter((d) => d.state !== 'removed').length;
     if (alive < W.drifter_max) {
       const valid = map.shadePoints.filter((pt) => distXZ(pt, p.pos) >= W.shade_min_dist_player - EPS);
@@ -649,6 +650,7 @@ function runStep(g, input, emit) {
 
   // 11. Thắng / thua (hết lửa ưu tiên; thắng kể cả đúng tick hết giờ)
   // 11. Thắng/thua (Ticket-03 §3): không còn thắng sớm; chỉ xét ở bình minh
+  if (g.bench) return;
   if (p.flames <= 0) endGame(g, 'lost', 'no_flames', emit);
   else if (g.timeLeftTicks <= 0) {
     const lit = g.lanterns.filter((l) => l.lit).length;
