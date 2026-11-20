@@ -6,6 +6,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1" # CI chỉ chạy test/headless/soak, không cần cửa sổ Electron
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,5 +19,5 @@ jobs:
       - name: Verify scenarios + determinism
         run: npm run verify
       - name: Proof matches code at this commit
-        run: git diff --exit-code -- docs/proof/phase-3/runs
+        run: git diff --exit-code -- docs/proof/phase-4/runs
       - run: npm run build
