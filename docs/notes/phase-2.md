@@ -68,3 +68,38 @@ Ticket-02 **thay toàn bộ số tự chọn** bằng số chuẩn, nên `src/co
 | T16 | GUI: âm thanh (tổng hợp WebAudio) cho 10 sự kiện + nhạc nền | P3 |
 | T17 | GUI: HUD đúng bố cục + bảng màu chuẩn + ánh sáng môi trường 0.15 + 0.55 × tiến độ | P3 |
 | T18 | Hiệu năng: một Đêm 21.600 tick headless ≤ 30 s; GUI ≥ 30 FPS ở 1280×720 | P1 |
+
+## 4. Trạng thái kiểm chứng
+
+`npm test` 50/50 · `npm run verify` 20/20 PASS ([verify-report](../proof/phase-2/verify-report.md)): gồm 9 kiểm tra hồi quy Phase 1 và 11 scenario Phase 2.
+
+| ID | Kết quả | Bằng chứng |
+|---|---|---|
+| T1–T13 (headless) | **Đạt** | Unit test `tests/phase2.test.js` + scenario `scenarios/phase2.cases.json` (≥ 1 scenario cho mỗi tính năng mới) |
+| T18 hiệu năng headless | **Đạt** | 21.600 tick mỗi Đêm chạy 0.2–0.5 s (test T18) |
+| T14–T17 GUI | **Đạt một phần** | Ảnh chụp tự động [menu](../proof/phase-2/gui-menu.png), [Đêm 1](../proof/phase-2/gui-night1.png), [Đêm 2](../proof/phase-2/gui-night2.png), [Đêm 3](../proof/phase-2/gui-night3.png): HUD đúng bố cục, bảng màu chuẩn, địa hình 3 Đêm. Chuỗi menu → giới thiệu → chơi → kết quả → Đêm kế, menu tạm dừng, cài đặt lưu localStorage, âm thanh WebAudio **đã code nhưng chưa có người chơi kiểm tra bằng tay** |
+| T18 ≥ 30 FPS | **Chưa đo trên máy thật** | Có bộ đếm FPS ở góc dưới trái. Chrome headless dùng render phần mềm nên không đại diện. Cần chạy `npm run dev` trên máy thật và ghi số |
+
+## 5. Test Phase 1 đã sửa / bỏ và lý do
+
+| Test / scenario Phase 1 | Thay đổi | Lý do |
+|---|---|---|
+| R3 nhặt (1.2 m, +10 điểm khi nhặt) | Sửa: 1.0 m + chênh cao ≤ 1.5; điểm 0 khi nhặt | Số chuẩn; điểm +10 tính khi **nạp** |
+| R4 / R5 / walk-collect-light / win-last-lantern | Sửa: sức chứa 10, chi phí 10, tương tác 2.0, điểm 948 | Số chuẩn |
+| R6 đom đóm rơi thì mất (A6) | **Bỏ**, thay bằng T7 (rơi ra vành, TTL 480) | Ticket-02 thay luật |
+| R6 Bóng Mực đuổi ở 20 m | Sửa: đặt ở 10 m | Bóng Mực chỉ đuổi khi ≤ 12 m (luật mới) |
+| R8 tỏa sáng (1 đom đóm, 6 m, 3 s, +25) | Sửa: 3 đom đóm, 3D ≤ 5 m, 120 tick, đẩy 4 m/15 tick, +5 | Số chuẩn |
+| R9 vùng an toàn 5 m (+0.01) | Sửa: 6 m, chặn đúng mép; thêm kiểm tra đẩy ra trong 30 tick | Số chuẩn |
+| R11 Bóng Mực sinh tick 1500 | Sửa: lịch 300 / 300 + 480k, tối đa 6 | Lịch chuẩn |
+| R1 / R12 dòng đầu là snapshot | Sửa: dòng đầu là `night_start` (tick 0) | Contract v1.1 thêm sự kiện mới |
+| R15 contract_version "1.0" | Sửa: "1.1" | Contract v1.1 |
+| Phase 1 "không rơi khỏi đảo" (A10) | **Bỏ**, thay bằng T8 | Ticket-02 bật rơi khỏi đảo |
+
+Bằng chứng Phase 1 cũ trong `docs/proof/phase-1/` **giữ nguyên**: nó khớp với mã ở tag `phase-1`.
+
+## 6. Đánh giá Phase 2
+
+- **Đạt:** toàn bộ phần headless (P0–P2) và hồi quy Phase 1 với số chuẩn.
+- **Chưa đạt / chưa kiểm:** chưa ai chơi thử GUI bằng tay để xác nhận chuỗi màn hình, âm thanh, cảm giác; FPS chưa đo trên máy thật.
+- **AI sai ở Phase 2 (tự phát hiện bằng test/verify):** (1) Gió Lạc bị Tỏa Sáng tồn tại 119 thay vì 120 tick (lỗi thứ tự bước 7/8); (2) kỳ vọng `dash_cd_s` = 1.483 trong test là do agent tính sai (đúng là 1.5); (3) scenario Bùa Gió viết sai kịch bản (Mây đứng yên nên nhặt lại bùa ngay khi nó xuất hiện); (4) unit test T13 cho Mây đi ra khỏi cầu, vẫn qua test nhưng sai ý đồ. Bài học: kịch bản test cũng cần được review như code.
+- **Harness:** CLAUDE.md và skill `verify` đã cập nhật cho phạm vi 3 Đêm và Contract v1.1.

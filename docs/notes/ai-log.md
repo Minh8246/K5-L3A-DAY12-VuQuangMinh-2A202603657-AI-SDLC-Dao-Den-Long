@@ -29,3 +29,23 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: [CLA
 - Test bằng `node:test` có sẵn, không cài thêm thư viện.
 - Một lệnh `npm run verify` vừa kiểm chứng vừa lưu bằng chứng, thay vì agent chạy và đọc output từng bước.
 - Không dùng subagent.
+
+## Phase 2
+
+**Cách làm:** dán Ticket-02. Agent tóm tắt và so sánh với giả định Phase 1, đề xuất ưu tiên P0 → P3 theo điểm (headless trước, GUI sau), tôi chọn. Sau đó: lưu nguyên văn ticket → viết spec (B1–B21, T1–T18, danh sách test cũ phải sửa) → viết lại core theo thứ tự 12 bước → test → scenario → GUI.
+
+**Lời nhắc chính:** "phase sau có gì đây" kèm toàn bộ Ticket-02. Trả lời câu hỏi: push/tag phase-1 ngay, và chọn ưu tiên headless P0 → P3.
+
+**Các lần AI sai và cách phát hiện:**
+
+| # | Lỗi | Phát hiện bằng | Sửa |
+|---|---|---|---|
+| 5 | Không nhắc tag `phase-1` trước khi Phase 2 mở (người dùng chưa trả lời câu hỏi push) | Agent kiểm `git ls-remote` khi nhận ticket mới | Push và tag ngay khi được đồng ý. Bài học: hỏi push/tag sớm, không đợi |
+| 6 | Gió Lạc bị Tỏa Sáng chỉ tồn tại 119 tick thay vì 120 (trừ bộ đếm ngay trong tick chuyển trạng thái) | Unit test T12 đỏ | Cờ `fleeFresh` bỏ qua lần trừ đầu |
+| 7 | Test tính sai `dash_cd_s` (1.483 thay vì 1.5) | Test đỏ → đối chiếu với ticket: hồi chiêu tính **từ lúc bắt đầu** | Sửa test, ghi lý do |
+| 8 | Scenario Bùa Gió: Mây đứng yên nên nhặt lại bùa ngay khi nó xuất hiện. Unit test T13 cho Mây đi ra khỏi cầu và rơi | verify FAIL → đọc output thật | Sửa kịch bản (đi dọc cầu). Thêm vào CLAUDE.md: "kịch bản test cũng phải được review" |
+| 9 | `drifter_drop` phát trước `pulse` trong cùng tick | verify FAIL (thứ tự sự kiện) | Phát `pulse` trước (nguyên nhân trước hệ quả) |
+
+**Harness thay đổi:** CLAUDE.md (số chuẩn chỉ ở `tuning.js`/`maps.js`, thứ tự 12 bước, review kịch bản test); skill `verify` (hồi quy mọi phase, `night`/`at`/`near`, không dùng FPS headless làm bằng chứng); CI kiểm tra `docs/proof/phase-2/runs`.
+
+**Token / chi phí (ước tính):** _điền số thật từ `/cost` khi kết thúc phase._ Cách tiết kiệm: một lần viết lại core thay vì vá dần; giá trị mong đợi tính bằng tay một lần; dùng `npm run verify` thay vì đọc từng output.
