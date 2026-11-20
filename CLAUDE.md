@@ -1,6 +1,6 @@
 # Đảo Đèn Lồng — hướng dẫn cho agent
 
-Game 3D (Three.js), 3 Đêm + chế độ headless theo **Test Contract v1.1**. Yêu cầu: `docs/lab/PRD-0.md`, `docs/lab/TICKET-02.md` (ticket mới ghi đè ticket cũ). Spec + giả định: `docs/notes/phase-N.md`.
+Game 3D (Three.js), 3 Đêm + chế độ headless theo **Test Contract v1.2**. Yêu cầu: `docs/lab/PRD-0.md`, `TICKET-02.md`, `TICKET-03.md` (ticket mới ghi đè ticket cũ; luật [THAY THẾ] → cập nhật ADR + CHANGELOG + sửa/xóa test có lý do, KHÔNG skip). Spec + giả định: `docs/notes/phase-N.md`.
 
 ## Lệnh
 - Cài: `npm ci` · Chơi: `npm run dev` · Build web: `npm run build`
@@ -12,6 +12,7 @@ Game 3D (Three.js), 3 Đêm + chế độ headless theo **Test Contract v1.1**. 
 - `src/core/` = logic thuần, tất định. CẤM import three/DOM, CẤM `Math.random`, `Date`, `performance`. Ngẫu nhiên chỉ qua `rng.js` (seed).
 - `src/headless.js` = CLI theo contract. `src/render/` = Three.js + HUD, chỉ đọc state từ core và gửi input cùng định dạng contract.
 - Số chuẩn (Ticket-02) chỉ nằm ở `src/core/tuning.js` (TUNING + WORLD); bản đồ chuẩn ở `src/core/maps.js`. `game.contract.json` phải khớp (có test). KHÔNG tự đổi số chuẩn.
+- Dầu đèn là số nguyên đơn vị 1/60 (`fuelU`); vùng an toàn chỉ qua `isProtected()`; sức chứa chỉ qua `capacityOf()` (xem docs/notes/adr-001-fuel.md).
 - Thứ tự 12 bước trong một tick là bắt buộc (`runStep` trong sim.js đánh số theo ticket). Thắng/thua chỉ xét ở bước 11.
 - Phần sáng tạo thêm chỉ nằm ở `src/render/` hoặc tắt khi headless — không được đổi output headless.
 

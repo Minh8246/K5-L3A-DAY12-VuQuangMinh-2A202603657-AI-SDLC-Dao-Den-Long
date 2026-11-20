@@ -49,3 +49,11 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: [CLA
 **Harness thay đổi:** CLAUDE.md (số chuẩn chỉ ở `tuning.js`/`maps.js`, thứ tự 12 bước, review kịch bản test); skill `verify` (hồi quy mọi phase, `night`/`at`/`near`, không dùng FPS headless làm bằng chứng); CI kiểm tra `docs/proof/phase-2/runs`.
 
 **Token / chi phí (ước tính):** _điền số thật từ `/cost` khi kết thúc phase._ Cách tiết kiệm: một lần viết lại core thay vì vá dần; giá trị mong đợi tính bằng tay một lần; dùng `npm run verify` thay vì đọc từng output.
+
+## Phase 3
+
+**Cách làm (30 phút):** dán Ticket-03. Agent lưu nguyên văn → thêm tuning v1.2 → vá core bằng một script thay thế có kiểm tra (báo lỗi nếu không tìm thấy chuỗi) → chạy test để thấy đúng 8 test cũ bị luật mới làm sai → sửa hoặc xóa từng test có ghi lý do → thêm 14 test P3 → tính lại scenario → ADR, CHANGELOG → GUI.
+
+**AI sai:** (10) script vá file viết bằng heredoc bị bash hiểu sai dấu nháy → chuyển sang ghi file bằng công cụ; (11) kịch bản test drain cho Bóng đi ngang qua vùng phát hiện của Mây (code đúng, kịch bản sai); (12) một lệnh Edit không áp dụng được vì chuỗi xuất hiện 2 lần (chế độ mù màu không được áp dụng khi mở game) → phát hiện nhờ kết quả công cụ, đã sửa.
+
+**Token / chi phí (ước tính):** _điền từ `/cost`._ Tiết kiệm: chỉ vá những chỗ cần đổi thay vì viết lại core; để test cho biết chính xác những gì luật mới làm hỏng.
