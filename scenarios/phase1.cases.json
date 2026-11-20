@@ -1,47 +1,46 @@
 {
-  "_comment": "Scenario headless của Phase 1. Mỗi case chạy qua CLI thật (headless_cmd trong game.contract.json). expect.events: các sự kiện phải xuất hiện theo đúng thứ tự [tick|null, name, data|null]; expect.absent: tên sự kiện không được xuất hiện; expect.end: so khớp các trường của dòng end.",
+  "_comment": "Scenario Phase 1, TÍNH LẠI theo số chuẩn Ticket-02 (hồi quy). Lý do từng thay đổi: docs/notes/phase-2.md mục 5. expect.events: [tick|null, name, data|null] theo thứ tự; expect.absent; expect.end; expect.at: [tick, đường-dẫn, giá trị]; expect.near: [tick, đường-dẫn, giá trị, sai số].",
   "cases": [
     {
       "id": "walk-collect-light",
       "req": "R3, R4",
-      "desc": "Đi thẳng +Z nhặt 5 đom đóm rồi interact cạnh L1 → deposit 5, L1 sáng",
-      "seed": 1, "ticks": 120,
+      "desc": "Đi +Z nhặt 10 đom đóm (z=3..12) rồi interact cạnh L1 (z=15) → nạp 10, L1 sáng",
+      "seed": 1, "ticks": 200,
       "scenario": { "random_motes": false, "random_shades": false, "shades": [],
-                    "motes": [[0, 0, 3], [0, 0, 4], [0, 0, 5], [0, 0, 6], [0, 0, 7]],
-                    "lanterns": [{ "id": "L1", "pos": [0, 0, 9] }] },
-      "inputs": { "frames": [ { "tick": 0, "move": [0, 1] }, { "tick": 70, "move": [0, 0] },
-                              { "tick": 80, "interact": true }, { "tick": 81, "interact": false } ] },
+                    "motes": [[0,0,3],[0,0,4],[0,0,5],[0,0,6],[0,0,7],[0,0,8],[0,0,9],[0,0,10],[0,0,11],[0,0,12]],
+                    "lanterns": [{ "id": "L1", "pos": [0, 0, 15] }] },
+      "inputs": { "frames": [ { "tick": 0, "move": [0, 1] }, { "tick": 130, "move": [0, 0] },
+                              { "tick": 140, "interact": true }, { "tick": 141, "interact": false } ] },
       "expect": {
         "events": [
-          [18, "mote_picked", { "carried": 1 }], [28, "mote_picked", { "carried": 2 }],
-          [38, "mote_picked", { "carried": 3 }], [48, "mote_picked", { "carried": 4 }],
-          [58, "mote_picked", { "carried": 5 }],
-          [81, "deposit", { "lantern_id": "L1", "amount": 5, "deposited": 5 }],
-          [81, "lantern_lit", { "lantern_id": "L1" }]
+          [20, "mote_picked", { "carried": 1 }], [30, "mote_picked", { "carried": 2 }],
+          [110, "mote_picked", { "carried": 10 }],
+          [141, "deposit", { "lantern_id": "L1", "amount": 10, "deposited": 10 }],
+          [141, "lantern_lit", { "lantern_id": "L1" }]
         ],
-        "end": { "ticks": 120, "state": "playing", "score": 150 }
+        "end": { "ticks": 200, "state": "playing", "score": 200 }
       }
     },
     {
       "id": "win-last-lantern",
       "req": "R5",
-      "desc": "4 đèn sáng sẵn, nạp đèn cuối → thắng all_lit; đèn sáng sẵn không cộng điểm",
+      "desc": "4 đèn sáng sẵn, nạp 10 vào đèn cuối → thắng all_lit (100 + 100 + 299×2 + 3×50)",
       "seed": 1, "ticks": 300,
       "scenario": { "random_motes": false, "random_shades": false, "motes": [], "shades": [],
-                    "player": { "carried": 5 },
+                    "player": { "carried": 10 },
                     "lanterns": [{ "id": "L1", "lit": true }, { "id": "L2", "lit": true },
                                  { "id": "L3", "lit": true }, { "id": "L4", "lit": true },
                                  { "id": "L5", "pos": [0, 0, 2] }] },
       "inputs": { "frames": [ { "tick": 0, "interact": true } ] },
       "expect": {
         "events": [[1, "lantern_lit", { "lantern_id": "L5" }], [1, "game_over", { "result": "won", "reason": "all_lit" }]],
-        "end": { "ticks": 1, "state": "won", "score": 848 }
+        "end": { "ticks": 1, "state": "won", "score": 948 }
       }
     },
     {
       "id": "shade-hits-until-lost",
       "req": "R6, R7",
-      "desc": "Bóng Mực đuổi tới Mây đứng yên; 3 lần chạm cách nhau invuln 90 tick → thua no_flames",
+      "desc": "Bóng Mực đuổi Mây đứng yên: chạm tick 60, lùi 2 m/60 tick, quay lại chạm tick 150, 240 → no_flames",
       "seed": 1, "ticks": 2000,
       "scenario": { "random_motes": false, "random_shades": false, "motes": [],
                     "player": { "carried": 4 }, "shades": [{ "id": "S1", "pos": [5, 1, 0] }] },
@@ -58,26 +57,27 @@
     {
       "id": "pulse-stuns-pushes",
       "req": "R8",
-      "desc": "Tỏa sáng khi Bóng Mực ở 4 m → choáng + đẩy, không bị chạm trong lúc choáng",
-      "seed": 1, "ticks": 170,
+      "desc": "Tỏa Sáng khi Bóng Mực cách 4 m (3D 4.005 ≤ 5) → choáng 120 tick, bị đẩy tới 8 m, không chạm được Mây",
+      "seed": 1, "ticks": 170, "every": 1,
       "scenario": { "random_motes": false, "random_shades": false, "motes": [],
-                    "player": { "carried": 2 }, "shades": [{ "id": "S1", "pos": [4, 1, 0] }] },
+                    "player": { "carried": 3 }, "shades": [{ "id": "S1", "pos": [4, 1, 0] }] },
       "inputs": { "frames": [ { "tick": 0, "pulse": true } ] },
       "expect": {
         "events": [[1, "pulse", { "stunned_ids": ["S1"] }]],
         "absent": ["player_hit"],
-        "end": { "ticks": 170, "state": "playing", "score": 25 }
+        "at": [[120, "shades.0.state", "stunned"], [15, "shades.0.pos", [8, 1, 0]]],
+        "end": { "ticks": 170, "state": "playing", "score": 5 }
       }
     },
     {
       "id": "safe-zone",
       "req": "R9",
-      "desc": "Mây đứng cạnh đèn đã thắp; Bóng Mực không vào được safe_radius nên không chạm được Mây",
+      "desc": "Mây đứng cạnh đèn đã sáng; 2 Bóng Mực đuổi nhưng bị chặn ở mép 6 m",
       "seed": 1, "ticks": 1200,
       "scenario": { "random_motes": false, "random_shades": false, "motes": [],
                     "player": { "pos": [0, 0, 10] },
                     "lanterns": [{ "id": "L1", "pos": [0, 0, 10], "lit": true }],
-                    "shades": [{ "id": "S1", "pos": [0, 1, -10] }, { "id": "S2", "pos": [20, 1, 10] }] },
+                    "shades": [{ "id": "S1", "pos": [0, 1, 0] }, { "id": "S2", "pos": [10, 1, 10] }] },
       "expect": { "absent": ["player_hit"], "end": { "ticks": 1200, "state": "playing" } }
     },
     {
@@ -94,7 +94,7 @@
     {
       "id": "default-world-seed7",
       "req": "R1, R11",
-      "desc": "Thế giới mặc định (ngẫu nhiên theo seed 7) với input lộn xộn — dùng để kiểm tra tất định",
+      "desc": "Thế giới mặc định Đêm 1 (seed 7) với input lộn xộn — kiểm tra tất định",
       "seed": 7, "ticks": 3000,
       "inputs": { "frames": [ { "tick": 0, "move": [0.4, 1], "cam_yaw_deg": 25 }, { "tick": 100, "jump": true },
                               { "tick": 101, "jump": false, "pulse": true }, { "tick": 102, "pulse": false },

@@ -15,7 +15,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - name: Verify scenarios + determinism
-        run: npm run verify -- --phase 1
+        run: npm run verify
       - name: Proof matches code at this commit
-        run: git diff --exit-code -- docs/proof/phase-1/runs
+        run: git diff --exit-code -- docs/proof/phase-2/runs
       - run: npm run build

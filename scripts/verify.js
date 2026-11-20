@@ -22,7 +22,7 @@ const [cmd, ...pre] = contract.headless_cmd.split(' ');
 const sha = (s) => createHash('sha256').update(s).digest('hex');
 
 function headless(c, outFile) {
-  const args = [...pre, '--seed', String(c.seed), '--night', '1', '--ticks', String(c.ticks), '--out', outFile];
+  const args = [...pre, '--seed', String(c.seed), '--night', String(c.night ?? 1), '--ticks', String(c.ticks), '--out', outFile, '--snapshot-every', String(c.every ?? 10)];
   if (c.scenario) {
     const f = join(tmp, `${c.id}.scenario.json`);
     writeFileSync(f, JSON.stringify(c.scenario));
@@ -56,6 +56,18 @@ function check(c, text) {
     const e = events.find((x) => x.name === name);
     if (e) problems.push(`không được có ${name} (gặp ở tick ${e.tick})`);
   }
+  const getPath = (o, path) => path.split('.').reduce((x, k) => (x == null ? undefined : x[k]), o);
+  const snapAt = (t) => lines.find((l) => l.type === 'snapshot' && l.tick === t);
+  for (const [t, path, want] of c.expect.at ?? []) {
+    const s = snapAt(t);
+    const got = s ? getPath(s, path) : '(không có snapshot)';
+    if (!isDeepStrictEqual(got, want)) problems.push(`tick ${t} ${path} = ${JSON.stringify(got)}, mong đợi ${JSON.stringify(want)}`);
+  }
+  for (const [t, path, want, tol] of c.expect.near ?? []) {
+    const s = snapAt(t);
+    const got = s ? getPath(s, path) : NaN;
+    if (!(Math.abs(got - want) <= tol)) problems.push(`tick ${t} ${path} = ${got}, mong đợi ${want} ± ${tol}`);
+  }
   for (const [k, v] of Object.entries(c.expect.end ?? {})) {
     if (!isDeepStrictEqual(end[k], v)) problems.push(`end.${k} = ${JSON.stringify(end[k])}, mong đợi ${JSON.stringify(v)}`);
   }
@@ -73,10 +85,12 @@ const pass = (testOut.match(/ℹ pass (\d+)/) ?? [])[1];
 const fail = (testOut.match(/ℹ fail (\d+)/) ?? [])[1];
 const testOk = t.status === 0;
 if (!testOk) failed++;
-rows.push(['unit+cli', 'R1–R15', `node --test: ${pass} pass, ${fail} fail`, 'test-report.txt', testOk]);
+rows.push(['unit+cli', 'R*, T*', `node --test: ${pass} pass, ${fail} fail`, 'test-report.txt', testOk]);
 
 // 2. Scenario qua CLI thật, mỗi case chạy 2 lần để kiểm tra tất định
-const { cases } = JSON.parse(readFileSync(join(root, 'scenarios', `phase${phase}.cases.json`), 'utf8'));
+// Phase N chạy lại toàn bộ scenario của Phase 1..N (hồi quy)
+const cases = [];
+for (let i = 1; i <= Number(phase); i++) cases.push(...JSON.parse(readFileSync(join(root, 'scenarios', `phase${i}.cases.json`), 'utf8')).cases);
 for (const c of cases) {
   let ok = true;
   let note;

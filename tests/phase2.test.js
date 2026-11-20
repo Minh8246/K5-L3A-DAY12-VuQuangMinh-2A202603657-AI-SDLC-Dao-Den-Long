@@ -199,11 +199,12 @@ test('T13: Bùa Gió — nhặt → 600 tick, chạy 7.2 m/s, lướt không h�
     ticks: 2710,
     every: 1,
     scenario: empty({ player: { pos: [34.5, 0, 0] } }),
-    frames: [{ tick: 1, move: [0, 1] }, { tick: 61, move: [0, 0] }],
+    frames: [{ tick: 1, move: [-1, 0] }, { tick: 61, move: [0, 0] }], // đi dọc cầu (−X), không rơi
   });
   assert.deepEqual(r.ev('charm_picked')[0], { type: 'event', tick: 1, name: 'charm_picked', data: { charm_id: 'C1', charm_ticks: 600 } });
   assert.equal(r.snapAt(1).player.charm_s, 10);
-  assert.ok(near(r.snapAt(61).player.pos[2] - r.snapAt(1).player.pos[2], 7.2));
+  assert.ok(near(r.snapAt(1).player.pos[0] - r.snapAt(61).player.pos[0], 7.2));
+  assert.equal(r.ev('player_hit').length, 0);
   assert.deepEqual(r.snapAt(1).charms[0], { id: 'C1', available: false, respawn_s: 45 });
   assert.equal(r.snapAt(2700).charms[0].available, false);
   assert.equal(r.snapAt(2701).charms[0].available, true);

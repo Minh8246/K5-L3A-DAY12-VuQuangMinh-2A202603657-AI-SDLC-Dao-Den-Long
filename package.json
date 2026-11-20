@@ -11,7 +11,7 @@
     "preview": "vite preview --open",
     "headless": "node src/headless.js",
     "test": "node --test",
-    "verify": "node scripts/verify.js"
+    "verify": "node scripts/verify.js --phase 2"
   },
   "dependencies": {
     "three": "0.160.0"

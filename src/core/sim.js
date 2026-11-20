@@ -401,6 +401,9 @@ function runStep(g, input, emit) {
         ids.push(s.id);
       }
     }
+    // Sự kiện pulse phát trước, hệ quả lên Gió Lạc (drifter_drop) phát sau
+    g.score += T.score.per_stun * ids.length;
+    emit('pulse', { stunned_ids: ids });
     for (const d of byId(g.drifters)) {
       if (d.state === 'removed' || dist3(c, d.pos) > T.pulse_radius + EPS) continue;
       if (d.state === 'chase' || d.state === 'idle') {
@@ -421,8 +424,6 @@ function runStep(g, input, emit) {
         emit('drifter_drop', { drifter_id: d.id, amount });
       }
     }
-    g.score += T.score.per_stun * ids.length;
-    emit('pulse', { stunned_ids: ids });
   }
 
   // 8. Di chuyển Bóng Mực và Gió Lạc

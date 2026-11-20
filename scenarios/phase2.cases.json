@@ -1,0 +1,88 @@
+{
+  "_comment": "Scenario Phase 2 (Ticket-02) — ít nhất 1 case cho mỗi tính năng mới. Giá trị mong đợi tính tay từ số chuẩn TRƯỚC khi chạy.",
+  "cases": [
+    {
+      "id": "p2-dash", "req": "T5", "night": 1, "seed": 1, "ticks": 60, "every": 1,
+      "desc": "Lướt 14 m/s × 12 tick = 2.8 m rồi chạy 6 m/s; nhấn lại khi còn hồi chiêu bị bỏ qua",
+      "scenario": { "random_motes": false, "random_shades": false },
+      "inputs": { "frames": [ { "tick": 0, "move": [0, 1], "dash": true }, { "tick": 1, "dash": false }, { "tick": 30, "dash": true } ] },
+      "expect": { "events": [[1, "dash", {}]], "at": [[12, "player.pos", [0, 0, 2.8]], [60, "player.pos", [0, 0, 7.6]], [1, "player.dash_cd_s", 1.5]] }
+    },
+    {
+      "id": "p2-pause", "req": "T6", "night": 1, "seed": 1, "ticks": 30, "every": 1,
+      "desc": "Tạm dừng tick 10–20: tick tăng, sim_tick/vị trí/thời gian đứng yên; tiếp tục chạy",
+      "scenario": { "random_motes": false, "random_shades": false },
+      "inputs": { "frames": [ { "tick": 0, "move": [0, 1] }, { "tick": 10, "pause": true }, { "tick": 11, "pause": false }, { "tick": 20, "pause": true } ] },
+      "expect": {
+        "events": [[11, "paused", {}], [21, "resumed", {}]],
+        "at": [[15, "state", "paused"], [15, "sim_tick", 10], [15, "player.pos", [0, 0, 1]], [30, "sim_tick", 20], [30, "player.pos", [0, 0, 2]]]
+      }
+    },
+    {
+      "id": "p2-hit-drop", "req": "T7", "night": 1, "seed": 1, "ticks": 61, "every": 1,
+      "desc": "Bị chạm khi mang 4: rơi 2 đom đóm (kind dropped, TTL 8 s) ra vành quanh Mây; Bóng Mực recoil 2 m trong 60 tick",
+      "scenario": { "random_motes": false, "random_shades": false, "motes": [], "player": { "carried": 4 }, "shades": [{ "id": "S1", "pos": [0.5, 1, 0] }] },
+      "expect": {
+        "events": [[1, "player_hit", { "by": "shade", "flames": 2, "dropped": 2 }]],
+        "at": [[1, "motes_active", 2], [1, "motes.0.kind", "dropped"], [1, "motes.0.ttl_s", 8], [1, "shades.0.state", "recoil"], [1, "player.invuln", true]],
+        "near": [[61, "shades.0.pos.0", 2.433, 0.002]]
+      }
+    },
+    {
+      "id": "p2-fall", "req": "T8", "night": 1, "seed": 1, "ticks": 200,
+      "desc": "Chạy ra khỏi mép đảo 40 m → rơi Y < −10: −1 lửa, mất 5 đom đóm; hồi sinh ở (0,0,0)",
+      "scenario": { "random_motes": false, "random_shades": false, "player": { "pos": [39.5, 0, 0], "carried": 5 } },
+      "inputs": { "frames": [ { "tick": 0, "move": [1, 0] }, { "tick": 10, "move": [0, 0] } ] },
+      "expect": { "events": [[null, "player_hit", { "by": "fall", "flames": 2, "dropped": 0, "lost": 5 }]], "at": [[200, "player.pos", [0, 0, 0]], [200, "player.flames", 2]] }
+    },
+    {
+      "id": "p2-shade-schedule", "req": "T4, T9", "night": 1, "seed": 3, "ticks": 800,
+      "desc": "Đêm 1: 2 Bóng Mực sinh tick 300 ở trạng thái spawning, con thứ 3 ở tick 780",
+      "scenario": { "random_motes": false, "player": { "flames": 99 } },
+      "expect": { "events": [[300, "shade_spawned", { "id": "S1" }], [300, "shade_spawned", { "id": "S2" }], [780, "shade_spawned", { "id": "S3" }]], "at": [[300, "shades.0.state", "spawning"]] }
+    },
+    {
+      "id": "p2-night2-pad", "req": "T10", "night": 2, "seed": 1, "ticks": 100, "every": 1,
+      "desc": "Đêm 2: đứng trên bục (20,0,18) → bắn 14 m/s lên + 24 m/s về đảo B, đáp ở tick 84 tại ≈ (51.238, 0, 6.755)",
+      "scenario": { "random_motes": false, "random_shades": false, "random_drifters": false, "player": { "pos": [20, 0, 18] } },
+      "expect": { "at": [[83, "player.grounded", false], [84, "player.grounded", true], [84, "player.pos.1", 0]], "near": [[84, "player.pos.0", 51.238, 0.01], [84, "player.pos.2", 6.755, 0.01]] }
+    },
+    {
+      "id": "p2-night3-ramp", "req": "T11", "night": 3, "seed": 1, "ticks": 70, "every": 10,
+      "desc": "Đêm 3: đi lên dốc 30° từ bán kính 30 (Y=0) tới tầng 1 (Y=3)",
+      "scenario": { "random_motes": false, "random_shades": false, "random_drifters": false, "player": { "pos": [25.981, 0, 15] } },
+      "inputs": { "frames": [ { "tick": 0, "move": [-0.866, -0.5] } ] },
+      "expect": { "at": [[70, "player.pos.1", 3], [70, "player.grounded", true]] }
+    },
+    {
+      "id": "p2-night3-wind", "req": "T11", "night": 3, "seed": 1, "ticks": 2100,
+      "desc": "Đêm 3: cơn gió từ sim_tick 1800 kéo dài 300 tick",
+      "scenario": { "random_motes": false, "random_shades": false, "random_drifters": false },
+      "expect": { "at": [[1790, "wind.active", false], [1800, "wind.active", true], [2090, "wind.active", true], [2100, "wind.active", false]] }
+    },
+    {
+      "id": "p2-drifter", "req": "T12", "night": 2, "seed": 1, "ticks": 320, "every": 1,
+      "desc": "Gió Lạc cách 10 m, Mây mang 6 → đuổi 7 m/s, chạm tick 76 cướp 3, flee 240 tick rồi removed (tick 316)",
+      "scenario": { "random_motes": false, "random_shades": false, "random_drifters": false, "player": { "carried": 6 }, "drifters": [{ "id": "D1", "pos": [10, 1, 0] }] },
+      "expect": { "events": [[76, "drifter_steal", { "drifter_id": "D1", "amount": 3, "carried": 3 }]], "absent": ["player_hit"], "at": [[315, "drifters.0.state", "flee"], [316, "drifters.0.state", "removed"]] }
+    },
+    {
+      "id": "p2-drifter-pulse", "req": "T12", "night": 2, "seed": 1, "ticks": 130, "every": 1,
+      "desc": "Tỏa Sáng trúng Gió Lạc đang flee mang 3 → thả 3 đom đóm rơi, biến mất sau 120 tick",
+      "scenario": { "random_motes": false, "random_shades": false, "random_drifters": false, "motes": [], "player": { "carried": 3 }, "drifters": [{ "id": "D1", "pos": [3, 1, 0], "state": "flee", "stolen": 3 }] },
+      "inputs": { "frames": [ { "tick": 0, "pulse": true } ] },
+      "expect": { "events": [[1, "pulse", { "stunned_ids": [] }], [1, "drifter_drop", { "drifter_id": "D1", "amount": 3 }]], "at": [[1, "motes_active", 3], [120, "drifters.0.state", "flee"], [121, "drifters.0.state", "removed"]] }
+    },
+    {
+      "id": "p2-charm", "req": "T13", "night": 2, "seed": 1, "ticks": 2710,
+      "desc": "Đứng cạnh Bùa Gió C1 (35,0,0) → nhặt tick 1, rồi đi dọc cầu về −X (7.2 m/s); bùa xuất hiện lại sau 2700 tick (tick 2701)",
+      "scenario": { "random_motes": false, "random_shades": false, "random_drifters": false, "player": { "pos": [34.5, 0, 0] } },
+      "inputs": { "frames": [ { "tick": 1, "move": [-1, 0] }, { "tick": 61, "move": [0, 0] } ] },
+      "expect": {
+        "near": [[70, "player.pos.0", 27.3, 0.01]],
+        "events": [[1, "charm_picked", { "charm_id": "C1", "charm_ticks": 600 }]],
+        "at": [[2700, "charms.0.available", false], [2710, "charms.0.available", true]]
+      }
+    }
+  ]
+}
