@@ -1,11 +1,13 @@
 # Đảo Đèn Lồng — hướng dẫn cho agent
 
-Game 3D (Three.js), 3 Đêm + chế độ headless theo **Test Contract v1.2**. Yêu cầu: `docs/lab/PRD-0.md`, `TICKET-02.md`, `TICKET-03.md` (ticket mới ghi đè ticket cũ; luật [THAY THẾ] → cập nhật ADR + CHANGELOG + sửa/xóa test có lý do, KHÔNG skip). Spec + giả định: `docs/notes/phase-N.md`.
+Game 3D (Three.js), 3 Đêm + chế độ headless theo **Test Contract v1.3**. Yêu cầu: `docs/lab/PRD-0.md`, `TICKET-02.md`, `TICKET-03.md`, `TICKET-04.md` (ticket mới ghi đè ticket cũ; luật [THAY THẾ] → cập nhật ADR + CHANGELOG + sửa/xóa test có lý do, KHÔNG skip). Spec + giả định: `docs/notes/phase-N.md`.
 
 ## Lệnh
 - Cài: `npm ci` · Chơi: `npm run dev` · Build web: `npm run build`
 - Headless: `node src/headless.js --seed 1 --night 1|2|3 --ticks 600 --out out/run.jsonl [--scenario f.json] [--inputs f.json]`
 - Chơi thẳng một Đêm: `http://localhost:5173/?night=2&autostart`
+- Desktop: `npm run build && npm start` · Bench: `npx electron . --bench --seed 42 --duration 30 --out bench.json` · Soak: `npm run soak`
+- Shell của agent có `ELECTRON_RUN_AS_NODE=1` → chạy Electron bằng `env -u ELECTRON_RUN_AS_NODE npx electron ...`
 - Test: `npm test` (phải xanh trước khi kết thúc) · Kiểm chứng + lưu bằng chứng: `npm run verify`
 
 ## Kiến trúc
@@ -14,6 +16,7 @@ Game 3D (Three.js), 3 Đêm + chế độ headless theo **Test Contract v1.2**. 
 - Số chuẩn (Ticket-02) chỉ nằm ở `src/core/tuning.js` (TUNING + WORLD); bản đồ chuẩn ở `src/core/maps.js`. `game.contract.json` phải khớp (có test). KHÔNG tự đổi số chuẩn.
 - Dầu đèn là số nguyên đơn vị 1/60 (`fuelU`); vùng an toàn chỉ qua `isProtected()`; sức chứa chỉ qua `capacityOf()` (xem docs/notes/adr-001-fuel.md).
 - Thứ tự 12 bước trong một tick là bắt buộc (`runStep` trong sim.js đánh số theo ticket). Thắng/thua chỉ xét ở bước 11.
+- `src/core/bench.js` = cảnh bench chuẩn (cờ `bench` trong sim tắt sinh/sát thương/nhặt/hao dầu/kết thúc). `src/leaderboard.js` = luật bảng xếp hạng dùng chung (Electron + web + test). Phần sáng tạo phải tắt trong bench.
 - Phần sáng tạo thêm chỉ nằm ở `src/render/` hoặc tắt khi headless — không được đổi output headless.
 
 ## Quy tắc

@@ -1,5 +1,18 @@
 # Changelog
 
+## [phase-4] — v1.0.0, Contract v1.3 "Bình minh: phát hành" (Ticket-04)
+
+### ⚠ Breaking changes
+- `contract_version` "1.3"; thêm `bench_cmd`, `soak_cmd`. `build_cmd` thành `npm ci && npm run build`; `run_cmd` thành `npx electron .` (bản desktop). Headless không đổi.
+- Phím điều khiển giờ đọc từ cấu hình đổi phím; tạm dừng mặc định là Esc (P vẫn dùng được nếu chưa gán cho việc khác).
+
+### Thêm
+- Bản desktop Electron (cửa sổ 1280×720), chế độ benchmark (`--bench`), lệnh `--export-leaderboard`.
+- Soak test `src/soak.js` (10 Đêm, đo RSS).
+- Bảng xếp hạng cục bộ (top 10, lưu file hoặc localStorage, tên tiếng Việt).
+- Tiếp cận: đổi phím có báo trùng và khôi phục mặc định, phụ đề và mũi tên Bóng Mực, giảm chuyển động, chữ ≥ 18 px và tùy chọn ×1.25.
+- Vẽ Bóng Mực và đom đóm bằng InstancedMesh (bench avg 70.9 → 328 fps).
+
 ## [phase-3] — Contract v1.2 "Đèn cạn dầu" (Ticket-03)
 
 ### ⚠ Breaking changes

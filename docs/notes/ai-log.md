@@ -57,3 +57,13 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: [CLA
 **AI sai:** (10) script vá file viết bằng heredoc bị bash hiểu sai dấu nháy → chuyển sang ghi file bằng công cụ; (11) kịch bản test drain cho Bóng đi ngang qua vùng phát hiện của Mây (code đúng, kịch bản sai); (12) một lệnh Edit không áp dụng được vì chuỗi xuất hiện 2 lần (chế độ mù màu không được áp dụng khi mở game) → phát hiện nhờ kết quả công cụ, đã sửa.
 
 **Token / chi phí (ước tính):** _điền từ `/cost`._ Tiết kiệm: chỉ vá những chỗ cần đổi thay vì viết lại core; để test cho biết chính xác những gì luật mới làm hỏng.
+
+## Phase 4
+
+**Cách làm:** lưu nguyên văn Ticket-04 → chọn Electron (một lựa chọn đáp ứng cả bench, RSS, lưu đĩa và lệnh xuất) → cờ bench trong core + `bench.js` → soak → đo thật → tối ưu theo số đo → bảng xếp hạng + tiếp cận → tài liệu, retro, release.
+
+**AI sai:** (13) Electron không giải nén được trên Windows → giải nén thủ công từ cache; (14) `ELECTRON_RUN_AS_NODE=1` trong shell của agent → bỏ biến khi chạy, ghi vào README; (15) màu instance sai do thuộc tính tạo sau khi shader biên dịch → phát hiện khi xem ảnh bench; (16) `Date` trong `src/core` vi phạm CLAUDE.md → chuyển `leaderboard.js` ra `src/`. Soak lần đầu ×1.21 (không đạt) → chẩn đoán heap trước khi đổi cấu hình, ghi trung thực trong phase-4.md.
+
+**Kiểm chứng dựa trên số đo:** bench 70.9/23.5 → (instancing) 299/39.1 → 306.6/31.3 → (bỏ cấp phát mỗi tick trong bench) 328.4/38.6. Mỗi lần đổi code đều đo lại để bench.json khớp code.
+
+**Token / chi phí:** _điền từ `/cost`._
