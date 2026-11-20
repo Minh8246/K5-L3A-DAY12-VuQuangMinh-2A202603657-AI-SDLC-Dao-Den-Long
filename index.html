@@ -5,26 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Đảo Đèn Lồng</title>
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0820; font-family: system-ui, sans-serif; color: #ffe9c4; }
+      :root { --sky: #0e1430; --ui: #f5f1e6; --gold: #f2c14e; --danger: #ff5a5f; --panel: rgba(14, 20, 48, 0.82); }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: var(--sky); font-family: system-ui, sans-serif; color: var(--ui); }
       canvas { display: block; }
-      #hud { position: fixed; top: 12px; left: 12px; display: flex; gap: 10px; flex-wrap: wrap; pointer-events: none; }
-      .chip { background: rgba(20, 12, 40, 0.72); border: 1px solid rgba(255, 190, 110, 0.35); border-radius: 10px; padding: 6px 12px; font-size: 15px; }
-      .chip b { color: #ffc46b; }
-      #hint { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); font-size: 18px; color: #ffd28a; text-shadow: 0 0 8px #000; pointer-events: none; }
-      #help { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 13px; opacity: 0.8; background: rgba(20, 12, 40, 0.6); padding: 6px 12px; border-radius: 8px; white-space: nowrap; }
-      #overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(10, 6, 25, 0.6); }
-      #overlay .box { background: rgba(28, 18, 52, 0.95); border: 1px solid #ffb35c; border-radius: 16px; padding: 28px 40px; text-align: center; }
-      #overlay h1 { margin: 0 0 8px; color: #ffc46b; }
-      #overlay button { margin-top: 16px; font-size: 18px; padding: 8px 22px; border-radius: 10px; border: 0; background: #ffb35c; color: #2a1640; cursor: pointer; }
-      #flash { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 160px 40px rgba(110, 40, 160, 0); transition: box-shadow 0.25s; }
+      .hud { position: fixed; pointer-events: none; font-size: 16px; text-shadow: 0 1px 4px #000; }
+      #hud-tl { top: 12px; left: 14px; font-size: 26px; }
+      #hud-tc { top: 10px; left: 50%; transform: translateX(-50%); font-size: 30px; font-weight: 700; letter-spacing: 1px; }
+      #hud-tc.danger { color: var(--danger); animation: blink 0.8s steps(2) infinite; }
+      @keyframes blink { 50% { opacity: 0.35; } }
+      #hud-tr { top: 12px; right: 14px; text-align: right; line-height: 1.5; }
+      #hud-tr b { color: var(--gold); font-size: 20px; }
+      #hud-bc { bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+      .slot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255, 229, 138, 0.5); background: rgba(0, 0, 0, 0.3); }
+      .slot.on { background: radial-gradient(#fff6c2, #ffe58a); box-shadow: 0 0 10px #ffe58a; }
+      #hud-br { bottom: 14px; right: 14px; display: flex; gap: 10px; }
+      .cd { width: 58px; height: 58px; border-radius: 12px; background: var(--panel); border: 2px solid var(--gold); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; position: relative; overflow: hidden; }
+      .cd .fill { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); }
+      .cd span { position: relative; }
+      #hint { bottom: 60px; left: 50%; transform: translateX(-50%); font-size: 20px; color: #ffe9b0; }
+      #arrow { width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 28px solid #ffb347; filter: drop-shadow(0 0 6px #ffb347); display: none; }
+      #fps { bottom: 4px; left: 6px; font-size: 11px; opacity: 0.6; }
+      .screen { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(8, 10, 30, 0.72); z-index: 5; }
+      .screen.show { display: flex; }
+      .box { background: var(--panel); border: 2px solid var(--gold); border-radius: 18px; padding: 28px 40px; text-align: center; max-width: 560px; }
+      .box h1 { margin: 0 0 6px; color: var(--gold); }
+      .box p { line-height: 1.5; }
+      .box button { display: block; width: 240px; margin: 10px auto; font-size: 17px; padding: 9px; border-radius: 10px; border: 0; background: #ffb347; color: #1b2350; cursor: pointer; font-weight: 600; }
+      .box button.alt { background: transparent; color: var(--ui); border: 1px solid var(--gold); }
+      .box label { display: block; margin: 12px 0; text-align: left; }
+      .box input[type='range'] { width: 100%; }
+      #flash { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 160px 40px rgba(122, 60, 255, 0); transition: box-shadow 0.25s; }
     </style>
   </head>
   <body>
-    <div id="hud"></div>
-    <div id="hint"></div>
-    <div id="help">WASD: đi · Chuột kéo / ← →: xoay camera · Space: nhảy · E: nạp đèn · F: tỏa sáng · R: chơi lại</div>
+    <div id="hud" style="display: none">
+      <div class="hud" id="hud-tl"></div>
+      <div class="hud" id="hud-tc"></div>
+      <div class="hud" id="hud-tr"></div>
+      <div class="hud" id="hud-bc"></div>
+      <div class="hud" id="hud-br">
+        <div class="cd" id="cd-dash"><div class="fill"></div><span>Lướt<br />Shift</span></div>
+        <div class="cd" id="cd-pulse"><div class="fill"></div><span>Tỏa sáng<br />F</span></div>
+      </div>
+      <div class="hud" id="hint"></div>
+      <div class="hud" id="arrow"></div>
+    </div>
+    <div class="hud" id="fps"></div>
     <div id="flash"></div>
-    <div id="overlay"><div class="box"><h1 id="ov-title"></h1><div id="ov-text"></div><button id="ov-btn">Chơi lại (R)</button></div></div>
+
+    <div class="screen" id="scr-menu"><div class="box">
+      <h1>Đảo Đèn Lồng</h1>
+      <p>Sương đen đã nuốt ánh sáng của ba hòn đảo. Mây, người giữ đèn nhỏ tuổi, phải gom đom đóm để thắp lại các Đèn Lồng Lớn trước bình minh.</p>
+      <button id="btn-start">Bắt đầu</button>
+      <button class="alt" id="btn-settings">Cài đặt</button>
+      <p style="font-size: 13px; opacity: 0.8">WASD đi · Chuột kéo / ← → xoay · Space nhảy · Shift lướt · E nạp đèn · F tỏa sáng · Esc/P tạm dừng</p>
+    </div></div>
+    <div class="screen" id="scr-intro"><div class="box">
+      <h1 id="intro-title"></h1>
+      <p id="intro-text" style="font-style: italic"></p>
+      <button id="btn-go">Vào Đêm</button>
+    </div></div>
+    <div class="screen" id="scr-result"><div class="box">
+      <h1 id="res-title"></h1>
+      <p id="res-text"></p>
+      <button id="btn-next">Đêm kế tiếp</button>
+      <button class="alt" id="btn-retry">Chơi lại Đêm này</button>
+      <button class="alt" id="btn-menu1">Về menu</button>
+    </div></div>
+    <div class="screen" id="scr-dawn"><div class="box">
+      <h1>Bình Minh</h1>
+      <p>Ba hòn đảo đã sáng trở lại. Mặt trời lên trên biển mây.</p>
+      <p>Tổng điểm: <b id="dawn-score" style="color: var(--gold); font-size: 28px"></b></p>
+      <button id="btn-menu2">Về menu</button>
+    </div></div>
+    <div class="screen" id="scr-pause"><div class="box">
+      <h1>Tạm dừng</h1>
+      <button id="btn-resume">Tiếp tục</button>
+      <button class="alt" id="btn-restart">Chơi lại Đêm</button>
+      <button class="alt" id="btn-settings2">Cài đặt</button>
+      <button class="alt" id="btn-menu3">Về menu</button>
+    </div></div>
+    <div class="screen" id="scr-settings"><div class="box">
+      <h1>Cài đặt</h1>
+      <label>Âm lượng <input type="range" id="set-vol" min="0" max="1" step="0.05" /></label>
+      <label>Độ nhạy chuột <input type="range" id="set-sens" min="0.05" max="1" step="0.05" /></label>
+      <button id="btn-set-back">Xong</button>
+    </div></div>
     <script type="module" src="/src/render/main.js"></script>
   </body>
 </html>
