@@ -66,4 +66,6 @@ Công cụ: **Claude Code** (model Claude Opus 5.5) trong VS Code. Harness: [CLA
 
 **Kiểm chứng dựa trên số đo:** bench 70.9/23.5 → (instancing) 299/39.1 → 306.6/31.3 → (bỏ cấp phát mỗi tick trong bench) 328.4/38.6. Mỗi lần đổi code đều đo lại để bench.json khớp code.
 
+(17) Soak đạt trên Windows (×1.17) nhưng **CI Ubuntu đỏ (×1.78)**. Agent đã tạo Release trước khi CI chạy xong → phát hiện bằng `gh run view --log-failed` → thử từng cờ V8 để tách nguyên nhân → `--jitless --single-threaded`. Bài học: chờ CI xanh rồi mới tạo Release.
+
 **Token / chi phí:** _điền từ `/cost`._

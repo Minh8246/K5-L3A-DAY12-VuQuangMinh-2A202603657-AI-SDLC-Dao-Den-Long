@@ -13,9 +13,9 @@
     "lost",
     "lost"
   ],
-  "mem_start_mb": 47.7,
-  "mem_end_mb": 55.7,
-  "duration_s": 0.3,
+  "mem_start_mb": 44.9,
+  "mem_end_mb": 46.3,
+  "duration_s": 1,
   "seed": 7,
   "pass": true
 }

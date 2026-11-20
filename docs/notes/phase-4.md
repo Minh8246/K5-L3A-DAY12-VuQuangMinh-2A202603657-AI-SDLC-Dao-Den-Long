@@ -34,9 +34,9 @@ Lần chạy đầu với cờ mặc định của Node: RSS 47.7 → 57.8 MB (�
 | 10 | 4.4 | 9.4 | 53.9 |
 | 60 | 4.5 | 13.4 | 56.8 |
 
-Heap thực dùng gần như đứng yên, nên **không có rò rỉ**. RSS tăng vì V8 nở thêm dung lượng dự trữ của heap và bộ nhớ mã JIT. Lệnh soak trong contract vì vậy chạy Node với `--max-semi-space-size=1`. Kết quả 10 Đêm: **47.7 → 55.7 MB (×1.168), 0 crash**.
+Heap thực dùng gần như đứng yên, nên **không có rò rỉ**. RSS tăng vì V8 nở thêm dung lượng dự trữ của heap và bộ nhớ mã JIT. Lệnh soak trong contract vì vậy chạy Node với `--max-semi-space-size=1`. Kết quả 10 Đêm: 47.7 → 55.7 MB (×1.168), 0 crash.
 
-**Rủi ro còn lại:** biên an toàn mỏng. Chạy 60 Đêm có lúc ×1.25, và RSS phụ thuộc máy.
+**Cập nhật sau CI (Ubuntu, Node 20):** cùng lệnh đó cho **42.5 → 75.5 MB (×1.78), không đạt**. CI bắt được lỗi này sau khi đã tạo Release. Trên Linux, bộ nhớ biên dịch JIT (TurboFan) và vùng nhớ của các luồng nền bị glibc malloc giữ lại, không trả cho hệ điều hành, trong khi heap JS vẫn đứng yên. Vì vậy `soak_cmd` chạy V8 ở chế độ `--jitless --single-threaded`: chỉ dùng trình thông dịch, không có luồng nền, nên đo đúng bộ nhớ của game. Trên Windows: ×1.175 (chỉ semi-space) → ×1.093 (+ single-threaded) → ×1.040 (+ jitless) → **×1.033 (cả hai)**. Thời gian 10 Đêm tăng từ 0.4 s lên 1.3 s, không đáng kể. Headless (`headless_cmd`) vẫn chạy bình thường có JIT.
 
 ## 4. Tiêu chí nghiệm thu → bằng chứng
 
@@ -44,7 +44,7 @@ Heap thực dùng gần như đứng yên, nên **không có rò rỉ**. RSS tă
 |---|---|---|
 | Bench: cảnh chuẩn (200 Bóng Mực wander, 100 đom đóm, L1–L3 fuel 100, camera vòng 30 m / 15 s, khởi động 3 s, đo 30 s, tự thoát mã 0) | **Đạt** | Test B1–B4; [bench.json](../proof/phase-4/bench.json); [ảnh cảnh bench](../proof/phase-4/bench-scene.png) |
 | Bench ≥ 60 avg / ≥ 30 p1 / load ≤ 10 s | **Đạt trên máy tác giả**: 328.4 / 38.6 / 1352 ms. Hai lần đo trước khi tối ưu cấp phát: p1 39.1 và 31.3, tức là có dao động | bench.json. Số chính thức đo trên máy chấm |
-| Soak 10 Đêm, 0 crash, RSS ≤ 1.2× | **Đạt** (×1.168) | [soak.json](../proof/phase-4/soak.json), test S1 |
+| Soak 10 Đêm, 0 crash, RSS ≤ 1.2× | **Đạt** sau khi sửa (×1.03 trên Windows; CI Ubuntu kiểm lại) | [soak.json](../proof/phase-4/soak.json), test S1 |
 | Bảng xếp hạng: nhập tên, top 10, sắp xếp, lưu đĩa, màn hình từ menu, lệnh xuất | **Đạt** (lệnh xuất đã kiểm bằng dữ liệu mẫu) | Test L1–L2; [leaderboard-export.log.txt](../proof/phase-4/leaderboard-export.log.txt): bằng điểm 420 thì Cuc (đạt trước) đứng trên Bao |
 | Đổi phím (báo trùng, khôi phục mặc định, được lưu), phụ đề, giảm chuyển động, chữ ≥ 18 px và ×1.25 | **Đã code**, chưa có người dùng kiểm bằng tay | `src/render/main.js`, `index.html` |
 | Contract v1.3 (bench_cmd, soak_cmd) | **Đạt** | Test C4, R15 |

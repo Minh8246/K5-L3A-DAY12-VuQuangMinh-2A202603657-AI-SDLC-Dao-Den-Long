@@ -5,7 +5,7 @@
   "run_cmd": "npx electron .",
   "headless_cmd": "node src/headless.js",
   "bench_cmd": "npx electron . --bench",
-  "soak_cmd": "node --expose-gc --max-semi-space-size=1 src/soak.js",
+  "soak_cmd": "node --expose-gc --max-semi-space-size=1 --jitless --single-threaded src/soak.js",
   "tuning": {
     "player_speed": 6,
     "carry_capacity": 10,

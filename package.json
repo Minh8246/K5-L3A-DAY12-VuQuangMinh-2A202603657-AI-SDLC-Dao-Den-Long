@@ -12,7 +12,7 @@
     "build": "vite build",
     "start": "electron .",
     "bench": "npm run build && electron . --bench --seed 42 --duration 30 --out bench.json",
-    "soak": "node --expose-gc --max-semi-space-size=1 src/soak.js --seed 7 --nights 10 --out soak.json",
+    "soak": "node --expose-gc --max-semi-space-size=1 --jitless --single-threaded src/soak.js --seed 7 --nights 10 --out soak.json",
     "headless": "node src/headless.js",
     "test": "node --test",
     "verify": "node scripts/verify.js --phase 4",

@@ -94,11 +94,11 @@ npx electron . --bench --seed 42 --duration 30 --out bench.json     # cần ch�
 ## Soak test
 
 ```bash
-node --expose-gc --max-semi-space-size=1 src/soak.js --seed 7 --nights 10 --out soak.json
+node --expose-gc --max-semi-space-size=1 --jitless --single-threaded src/soak.js --seed 7 --nights 10 --out soak.json
 ```
 
 - **Cách chạy:** 10 Đêm liên tiếp xoay vòng 1 → 2 → 3, Đêm thứ i dùng seed 7 + i, input ngẫu nhiên theo seed. Kết quả: [docs/proof/phase-4/soak.json](docs/proof/phase-4/soak.json).
-- **Cờ `--max-semi-space-size=1`:** giữ vùng nhớ young generation của V8 nhỏ. Chẩn đoán cho thấy heap thực dùng sau gc đứng yên quanh 4.2–4.5 MB qua 60 Đêm, nên **không có rò rỉ**. RSS tăng chỉ vì V8 nở thêm dung lượng dự trữ. Chi tiết ở [docs/notes/phase-4.md](docs/notes/phase-4.md).
+- **Cờ V8 `--max-semi-space-size=1 --jitless --single-threaded`:** chẩn đoán cho thấy heap JS thực dùng sau gc đứng yên quanh 4.2–4.5 MB qua 60 Đêm, nên **không có rò rỉ** trong game. Với cờ mặc định, RSS vẫn tăng (×1.21 trên Windows, ×1.78 trên CI Ubuntu) vì bộ nhớ biên dịch JIT và vùng nhớ của luồng nền bị bộ cấp phát giữ lại. Các cờ này bỏ đúng hai nguồn đó; logic game không đổi. Chi tiết ở [docs/notes/phase-4.md](docs/notes/phase-4.md).
 
 ## Bản phát hành v1.0.0
 
