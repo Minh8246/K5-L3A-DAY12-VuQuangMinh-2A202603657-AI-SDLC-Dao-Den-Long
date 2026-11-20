@@ -6,3 +6,6 @@ out/
 .env.*
 .DS_Store
 .claude/settings.local.json
+/bench.json
+/soak.json
+/out.json

@@ -20,4 +20,6 @@ jobs:
         run: npm run verify
       - name: Proof matches code at this commit
         run: git diff --exit-code -- docs/proof/phase-4/runs
+      - name: Soak 10 nights (crashes = 0, RSS <= 1.2x)
+        run: npm run soak && node -e "const r=require('./soak.json'); if(!r.pass){console.error(r); process.exit(1)}"
       - run: npm run build
