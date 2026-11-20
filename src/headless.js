@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Chế độ headless theo Test Contract v1.0 (mục B, E).
+// Chế độ headless theo Test Contract v1.1 (v1.0 mục B, E + Ticket-02 Phần 4).
 // node src/headless.js --seed <int> --night 1 [--scenario f.json] [--inputs f.json]
 //                      --ticks <int> --out <file.jsonl> [--snapshot-every <int>]
 // Mã thoát: 0 = ok; 1 = sai tham số / lỗi khác; 2 = file inputs/scenario sai định dạng.
@@ -7,6 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { runHeadless } from './core/run.js';
 import { FormatError, validateInputs, validateScenario } from './core/formats.js';
+import { MAPS } from './core/maps.js';
 
 class UsageError extends Error {}
 
@@ -43,7 +44,7 @@ function parseArgs(argv) {
   };
   const seed = int('seed', -Infinity);
   const night = int('night', 1);
-  if (night !== 1) throw new UsageError('chỉ hỗ trợ --night 1 ở Phase 1');
+  if (![1, 2, 3].includes(night)) throw new UsageError('--night phải là 1, 2 hoặc 3');
   const ticks = int('ticks', 0);
   if (!args.out) throw new UsageError('thiếu --out');
   const every = args['snapshot-every'] === undefined ? 10 : int('snapshot-every', 1);
@@ -67,7 +68,7 @@ function readJson(path, label) {
 function main() {
   try {
     const opts = parseArgs(process.argv.slice(2));
-    const scenario = opts.scenario ? validateScenario(readJson(opts.scenario, 'scenario')) : null;
+    const scenario = opts.scenario ? validateScenario(readJson(opts.scenario, 'scenario'), MAPS[opts.night].lanterns.length) : null;
     const frames = opts.inputs ? validateInputs(readJson(opts.inputs, 'inputs')) : [];
     const text = runHeadless({ ...opts, scenario, frames });
     const outPath = resolve(opts.out);

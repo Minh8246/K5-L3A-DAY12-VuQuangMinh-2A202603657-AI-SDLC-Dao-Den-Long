@@ -1,10 +1,11 @@
-// Kiểm tra định dạng file inputs / scenario theo Test Contract v1.0 (mục C, D).
+// Kiểm tra định dạng file inputs / scenario theo Test Contract v1.1 (v1.0 + mục Phần 4 của Ticket-02).
 // Sai định dạng → ném FormatError (headless thoát mã 2).
 
 export class FormatError extends Error {}
 
-export const BUTTONS = ['jump', 'interact', 'pulse', 'dash'];
-export const LANTERN_IDS = ['L1', 'L2', 'L3', 'L4', 'L5'];
+export const BUTTONS = ['jump', 'interact', 'pulse', 'dash', 'pause'];
+export const SHADE_STATES = ['spawning', 'wander', 'chase', 'recoil', 'stunned'];
+export const DRIFTER_STATES = ['idle', 'chase', 'flee', 'removed'];
 
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
@@ -16,7 +17,7 @@ function fail(msg) {
 }
 
 export function createInputState() {
-  return { move: [0, 0], cam_yaw_deg: 0, jump: false, interact: false, pulse: false, dash: false };
+  return { move: [0, 0], cam_yaw_deg: 0, jump: false, interact: false, pulse: false, dash: false, pause: false };
 }
 
 // Mỗi frame chỉ đổi các trường có mặt.
@@ -47,30 +48,51 @@ export function validateInputs(obj) {
   return obj.frames;
 }
 
-export function validateScenario(obj) {
+const posEntry = (m) => isVec3(m) || (isObj(m) && isVec3(m.pos) && (!('id' in m) || typeof m.id === 'string'));
+
+export function validateScenario(obj, lanternCount = 5) {
   if (!isObj(obj)) fail('scenario: phải là một đối tượng JSON');
+  const ids = Array.from({ length: lanternCount }, (_, i) => `L${i + 1}`);
   if ('player' in obj) {
     const p = obj.player;
     if (!isObj(p)) fail('scenario.player: phải là đối tượng');
     if ('pos' in p && !isVec3(p.pos)) fail('scenario.player.pos: phải là [x, y, z]');
-    if ('carried' in p && !isCount(p.carried)) fail('scenario.player.carried: số nguyên ≥ 0');
-    if ('flames' in p && !isCount(p.flames)) fail('scenario.player.flames: số nguyên ≥ 0');
+    for (const k of ['carried', 'flames', 'invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks']) {
+      if (k in p && !isCount(p[k])) fail(`scenario.player.${k}: số nguyên ≥ 0`);
+    }
   }
-  for (const k of ['random_motes', 'random_shades']) {
+  for (const k of ['random_motes', 'random_shades', 'random_drifters', 'wind_enabled']) {
     if (k in obj && typeof obj[k] !== 'boolean') fail(`scenario.${k}: phải là boolean`);
   }
   if ('motes' in obj) {
     if (!Array.isArray(obj.motes)) fail('scenario.motes: phải là mảng');
     obj.motes.forEach((m, i) => {
-      const ok = isVec3(m) || (isObj(m) && isVec3(m.pos) && (!('id' in m) || typeof m.id === 'string'));
-      if (!ok) fail(`scenario.motes[${i}]: phải là [x, y, z]`);
+      if (!posEntry(m)) fail(`scenario.motes[${i}]: phải là [x, y, z]`);
+      if (isObj(m) && 'kind' in m && !['random', 'dropped'].includes(m.kind)) fail(`scenario.motes[${i}].kind`);
     });
   }
   if ('shades' in obj) {
     if (!Array.isArray(obj.shades)) fail('scenario.shades: phải là mảng');
     obj.shades.forEach((s, i) => {
-      const ok = isVec3(s) || (isObj(s) && isVec3(s.pos) && (!('id' in s) || typeof s.id === 'string'));
-      if (!ok) fail(`scenario.shades[${i}]: phải là { "pos": [x, y, z], "id"?: string }`);
+      if (!posEntry(s)) fail(`scenario.shades[${i}]: phải là { "pos": [x, y, z] }`);
+      if (isObj(s) && 'state' in s && !SHADE_STATES.includes(s.state)) fail(`scenario.shades[${i}].state: một trong ${SHADE_STATES}`);
+      if (isObj(s) && 'state_ticks_left' in s && !isCount(s.state_ticks_left)) fail(`scenario.shades[${i}].state_ticks_left`);
+    });
+  }
+  if ('drifters' in obj) {
+    if (!Array.isArray(obj.drifters)) fail('scenario.drifters: phải là mảng');
+    obj.drifters.forEach((d, i) => {
+      if (!posEntry(d)) fail(`scenario.drifters[${i}]: phải là { "pos": [x, y, z] }`);
+      if (isObj(d) && 'state' in d && !DRIFTER_STATES.includes(d.state)) fail(`scenario.drifters[${i}].state`);
+      if (isObj(d) && 'stolen' in d && !isCount(d.stolen)) fail(`scenario.drifters[${i}].stolen`);
+    });
+  }
+  if ('charms' in obj) {
+    if (!Array.isArray(obj.charms)) fail('scenario.charms: phải là mảng');
+    obj.charms.forEach((c, i) => {
+      if (!posEntry(c)) fail(`scenario.charms[${i}]: phải là { "pos": [x, y, z] }`);
+      if (isObj(c) && 'available' in c && typeof c.available !== 'boolean') fail(`scenario.charms[${i}].available`);
+      if (isObj(c) && 'respawn_ticks' in c && !isCount(c.respawn_ticks)) fail(`scenario.charms[${i}].respawn_ticks`);
     });
   }
   if ('lanterns' in obj) {
@@ -78,14 +100,12 @@ export function validateScenario(obj) {
     obj.lanterns.forEach((l, i) => {
       const where = `scenario.lanterns[${i}]`;
       if (!isObj(l)) fail(`${where}: phải là đối tượng`);
-      if (!LANTERN_IDS.includes(l.id)) fail(`${where}.id: phải là một trong ${LANTERN_IDS.join(', ')}`);
+      if (!ids.includes(l.id)) fail(`${where}.id: phải là một trong ${ids.join(', ')}`);
       if ('pos' in l && !isVec3(l.pos)) fail(`${where}.pos: phải là [x, y, z]`);
       if ('deposited' in l && !isCount(l.deposited)) fail(`${where}.deposited: số nguyên ≥ 0`);
       if ('lit' in l && typeof l.lit !== 'boolean') fail(`${where}.lit: phải là boolean`);
     });
   }
-  if ('time_left_s' in obj && !(isNum(obj.time_left_s) && obj.time_left_s >= 0)) {
-    fail('scenario.time_left_s: số ≥ 0');
-  }
+  if ('time_left_s' in obj && !(isNum(obj.time_left_s) && obj.time_left_s >= 0)) fail('scenario.time_left_s: số ≥ 0');
   return obj;
 }

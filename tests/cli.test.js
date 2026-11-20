@@ -22,7 +22,7 @@ function file(name, content) {
 const base = (out) => ['--seed', '1', '--night', '1', '--ticks', '30', '--out', out];
 
 test('R15: game.contract.json khớp tuning thật của code', () => {
-  assert.equal(contract.contract_version, '1.0');
+  assert.equal(contract.contract_version, '1.1'); // P2: Ticket-02 nâng contract lên v1.1
   assert.deepEqual(contract.tuning, JSON.parse(JSON.stringify(TUNING)));
 });
 
@@ -31,7 +31,8 @@ test('R12: chạy hợp lệ → mã 0, ghi JSONL, dòng cuối end', () => {
   const r = cli([...base(out), '--inputs', file('in.json', { frames: [{ tick: 0, move: [0, 1] }] })]);
   assert.equal(r.status, 0, r.stderr);
   const lines = readFileSync(out, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
-  assert.equal(lines[0].type, 'snapshot');
+  assert.deepEqual(lines[0], { type: 'event', tick: 0, name: 'night_start', data: { night: 1 } }); // P2: v1.1
+  assert.equal(lines[1].type, 'snapshot');
   assert.deepEqual(lines.at(-1), { type: 'end', ticks: 30, state: 'playing', score: lines.at(-1).score });
 });
 
@@ -63,6 +64,17 @@ test('R12: scenario sai định dạng → mã 2', () => {
     const r = cli([...base(join(dir, 'x.jsonl')), '--scenario', file('bad-sc.json', content)]);
     assert.equal(r.status, 2, JSON.stringify(content));
   }
+});
+
+test('T1: --night 2 và 3 chạy được; --night 4 → mã 1', () => {
+  for (const n of ['2', '3']) assert.equal(cli(['--seed', '1', '--night', n, '--ticks', '10', '--out', join(dir, 'n.jsonl')]).status, 0);
+  assert.equal(cli(['--seed', '1', '--night', '4', '--ticks', '10', '--out', join(dir, 'n.jsonl')]).status, 1);
+});
+
+test('T1: scenario Đêm 1 dùng id L6 → mã 2; Đêm 2 thì hợp lệ', () => {
+  const f = file('l6.json', { lanterns: [{ id: 'L6', lit: true }] });
+  assert.equal(cli([...base(join(dir, 'x.jsonl')), '--scenario', f]).status, 2);
+  assert.equal(cli(['--seed', '1', '--night', '2', '--ticks', '5', '--out', join(dir, 'x.jsonl'), '--scenario', f]).status, 0);
 });
 
 test('R12: thiếu tham số bắt buộc → mã khác 0 + stderr', () => {
