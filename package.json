@@ -1,0 +1,22 @@
+{
+  "name": "dao-den-long",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Đảo Đèn Lồng — game 3D (Day 12 AI SDLC lab)",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "dev": "vite --open",
+    "build": "vite build",
+    "preview": "vite preview --open",
+    "headless": "node src/headless.js",
+    "test": "node --test tests/",
+    "verify": "node scripts/verify.js"
+  },
+  "dependencies": {
+    "three": "0.160.0"
+  },
+  "devDependencies": {
+    "vite": "5.4.11"
+  }
+}
