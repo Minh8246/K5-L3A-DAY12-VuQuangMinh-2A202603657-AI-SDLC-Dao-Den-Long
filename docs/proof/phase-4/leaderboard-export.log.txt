@@ -1,0 +1,36 @@
+# Đầu vào (file leaderboard.json trong thư mục dữ liệu, thứ tự lộn xộn):
+{"entries":[
+ {"name":"Bao","score":420,"nights_won":1,"achieved_at":"2026-11-20T10:05:00+07:00","seed":11},
+ {"name":"Mây_đèn","score":1310,"nights_won":3,"achieved_at":"2026-11-20T10:20:00+07:00","seed":12},
+ {"name":"Cuc","score":420,"nights_won":1,"achieved_at":"2026-11-20T09:55:00+07:00","seed":13}
+]}
+
+$ DDL_USER_DATA=<thư mục tạm> npx electron . --export-leaderboard docs/proof/phase-4/leaderboard-export.json
+Đã xuất 3 mục → D:\VINUNI-LAB\K5-L3-LAB-Day12-VuQuangMinh-2A202603657-AI-SDLC\docs\proof\phase-4\leaderboard-export.json
+exit=0
+# Kết quả xuất (điểm giảm dần; Cuc và Bao bằng 420 điểm → Cuc đạt trước nên đứng trên):
+{
+  "entries": [
+    {
+      "name": "Mây_đèn",
+      "score": 1310,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T10:20:00+07:00",
+      "seed": 12
+    },
+    {
+      "name": "Cuc",
+      "score": 420,
+      "nights_won": 1,
+      "achieved_at": "2026-11-20T09:55:00+07:00",
+      "seed": 13
+    },
+    {
+      "name": "Bao",
+      "score": 420,
+      "nights_won": 1,
+      "achieved_at": "2026-11-20T10:05:00+07:00",
+      "seed": 11
+    }
+  ]
+}
