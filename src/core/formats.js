@@ -4,7 +4,7 @@
 export class FormatError extends Error {}
 
 export const BUTTONS = ['jump', 'interact', 'pulse', 'dash', 'pause'];
-export const SHADE_STATES = ['spawning', 'wander', 'chase', 'recoil', 'stunned'];
+export const SHADE_STATES = ['spawning', 'wander', 'chase', 'recoil', 'stunned', 'drain'];
 export const DRIFTER_STATES = ['idle', 'chase', 'flee', 'removed'];
 
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -57,7 +57,7 @@ export function validateScenario(obj, lanternCount = 5) {
     const p = obj.player;
     if (!isObj(p)) fail('scenario.player: phải là đối tượng');
     if ('pos' in p && !isVec3(p.pos)) fail('scenario.player.pos: phải là [x, y, z]');
-    for (const k of ['carried', 'flames', 'invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks']) {
+    for (const k of ['carried', 'flames', 'invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks', 'successful_lights']) {
       if (k in p && !isCount(p[k])) fail(`scenario.player.${k}: số nguyên ≥ 0`);
     }
   }
@@ -104,6 +104,8 @@ export function validateScenario(obj, lanternCount = 5) {
       if ('pos' in l && !isVec3(l.pos)) fail(`${where}.pos: phải là [x, y, z]`);
       if ('deposited' in l && !isCount(l.deposited)) fail(`${where}.deposited: số nguyên ≥ 0`);
       if ('lit' in l && typeof l.lit !== 'boolean') fail(`${where}.lit: phải là boolean`);
+      if ('ever_lit' in l && typeof l.ever_lit !== 'boolean') fail(`${where}.ever_lit: phải là boolean`);
+      if ('fuel' in l && !(isNum(l.fuel) && l.fuel >= 0 && l.fuel <= 100)) fail(`${where}.fuel: số trong [0, 100]`);
     });
   }
   if ('time_left_s' in obj && !(isNum(obj.time_left_s) && obj.time_left_s >= 0)) fail('scenario.time_left_s: số ≥ 0');

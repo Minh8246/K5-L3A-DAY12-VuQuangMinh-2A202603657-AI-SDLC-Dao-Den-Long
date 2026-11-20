@@ -1,0 +1,354 @@
+{
+ "_comment": "Scenario Phase 3 (Ticket-03 Đèn cạn dầu, Contract v1.2). Giá trị mong đợi tính tay theo đơn vị dầu 1/60.",
+ "cases": [
+  {
+   "id": "p3-fuel-out",
+   "req": "P3-FUEL, P3-OUT",
+   "seed": 1,
+   "ticks": 70,
+   "every": 10,
+   "desc": "Đèn sáng fuel 1 → hao 1/s → tắt ở tick 60 (lantern_out), deposited 0, ever_lit",
+   "scenario": {
+    "random_motes": false,
+    "random_shades": false,
+    "lanterns": [
+     {
+      "id": "L1",
+      "pos": [
+       0,
+       0,
+       10
+      ],
+      "lit": true,
+      "fuel": 1
+     }
+    ]
+   },
+   "expect": {
+    "events": [
+     [
+      60,
+      "lantern_out",
+      {
+       "lantern_id": "L1"
+      }
+     ]
+    ],
+    "at": [
+     [
+      60,
+      "lanterns.0.lit",
+      false
+     ],
+     [
+      60,
+      "lanterns.0.ever_lit",
+      true
+     ],
+     [
+      60,
+      "lanterns.0.fuel",
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "id": "p3-refuel",
+   "req": "P3-REFUEL",
+   "seed": 1,
+   "ticks": 10,
+   "every": 1,
+   "desc": "Châm dầu đèn fuel 55 khi mang 10 → dùng 5 con, fuel 100, +25 điểm",
+   "scenario": {
+    "random_motes": false,
+    "random_shades": false,
+    "player": {
+     "carried": 10
+    },
+    "lanterns": [
+     {
+      "id": "L1",
+      "pos": [
+       0,
+       0,
+       2
+      ],
+      "lit": true,
+      "fuel": 55
+     }
+    ]
+   },
+   "inputs": {
+    "frames": [
+     {
+      "tick": 0,
+      "interact": true
+     }
+    ]
+   },
+   "expect": {
+    "events": [
+     [
+      1,
+      "refuel",
+      {
+       "lantern_id": "L1",
+       "amount": 5,
+       "fuel": 100
+      }
+     ]
+    ],
+    "at": [
+     [
+      1,
+      "player.carried",
+      5
+     ],
+     [
+      1,
+      "score",
+      25
+     ]
+    ]
+   }
+  },
+  {
+   "id": "p3-relight",
+   "req": "P3-RELIGHT, P3-CAP",
+   "seed": 1,
+   "ticks": 5,
+   "every": 1,
+   "desc": "Đèn từng sáng thắp lại bằng 5 con: relight true, +40, capacity 12",
+   "scenario": {
+    "random_motes": false,
+    "random_shades": false,
+    "player": {
+     "carried": 5
+    },
+    "lanterns": [
+     {
+      "id": "L1",
+      "pos": [
+       0,
+       0,
+       2
+      ],
+      "ever_lit": true
+     }
+    ]
+   },
+   "inputs": {
+    "frames": [
+     {
+      "tick": 0,
+      "interact": true
+     }
+    ]
+   },
+   "expect": {
+    "events": [
+     [
+      1,
+      "lantern_lit",
+      {
+       "lantern_id": "L1",
+       "relight": true
+      }
+     ]
+    ],
+    "at": [
+     [
+      1,
+      "score",
+      65
+     ],
+     [
+      1,
+      "player.capacity",
+      12
+     ],
+     [
+      1,
+      "lanterns.0.relit_count",
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "p3-drain",
+   "req": "P3-DRAIN",
+   "seed": 1,
+   "ticks": 320,
+   "every": 10,
+   "desc": "Bóng wander tới đèn fuel 20, drain từ tick 120, fuel_drain tick 180 (fuel 12), đèn tắt tick 300",
+   "scenario": {
+    "random_motes": false,
+    "random_shades": false,
+    "player": {
+     "pos": [
+      0,
+      0,
+      -25
+     ]
+    },
+    "lanterns": [
+     {
+      "id": "L1",
+      "pos": [
+       0,
+       0,
+       10
+      ],
+      "lit": true,
+      "fuel": 20
+     }
+    ],
+    "shades": [
+     {
+      "id": "S1",
+      "pos": [
+       0,
+       1,
+       15
+      ]
+     }
+    ]
+   },
+   "expect": {
+    "events": [
+     [
+      180,
+      "fuel_drain",
+      {
+       "lantern_id": "L1",
+       "shade_id": "S1",
+       "fuel": 12
+      }
+     ],
+     [
+      300,
+      "lantern_out",
+      {
+       "lantern_id": "L1"
+      }
+     ]
+    ],
+    "at": [
+     [
+      120,
+      "shades.0.state",
+      "drain"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "p3-dawn-lost",
+   "req": "P3-WIN",
+   "seed": 1,
+   "ticks": 300,
+   "desc": "2/5 đèn sáng lúc bình minh → lost dawn",
+   "scenario": {
+    "random_motes": false,
+    "random_shades": false,
+    "time_left_s": 1,
+    "lanterns": [
+     {
+      "id": "L1",
+      "lit": true
+     },
+     {
+      "id": "L2",
+      "lit": true
+     }
+    ]
+   },
+   "expect": {
+    "events": [
+     [
+      60,
+      "game_over",
+      {
+       "result": "lost",
+       "reason": "dawn"
+      }
+     ]
+    ],
+    "end": {
+     "ticks": 60,
+     "state": "lost",
+     "score": 0
+    }
+   }
+  },
+  {
+   "id": "p3-no-early-win",
+   "req": "P3-WIN",
+   "seed": 1,
+   "ticks": 120,
+   "desc": "Thắp đèn cuối khi 4 đèn đã sáng → Đêm không kết thúc",
+   "scenario": {
+    "random_motes": false,
+    "random_shades": false,
+    "player": {
+     "carried": 10
+    },
+    "lanterns": [
+     {
+      "id": "L1",
+      "lit": true
+     },
+     {
+      "id": "L2",
+      "lit": true
+     },
+     {
+      "id": "L3",
+      "lit": true
+     },
+     {
+      "id": "L4",
+      "lit": true
+     },
+     {
+      "id": "L5",
+      "pos": [
+       0,
+       0,
+       2
+      ]
+     }
+    ]
+   },
+   "inputs": {
+    "frames": [
+     {
+      "tick": 0,
+      "interact": true
+     }
+    ]
+   },
+   "expect": {
+    "events": [
+     [
+      1,
+      "lantern_lit",
+      {
+       "lantern_id": "L5",
+       "relight": false
+      }
+     ]
+    ],
+    "absent": [
+     "game_over"
+    ],
+    "end": {
+     "ticks": 120,
+     "state": "playing"
+    }
+   }
+  }
+ ]
+}

@@ -18,7 +18,7 @@ test('R1: tick 0 — night_start, Mây ở gốc, 5 đèn chuẩn, 20 đom đóm
     [[0, 0, 25], [23.8, 0, 7.7], [14.7, 0, -20.2], [-14.7, 0, -20.2], [-23.8, 0, 7.7]],
   );
   assert.equal(s.state, 'playing');
-  assert.equal(s.time_left_s, 300);
+  assert.equal(s.time_left_s, 240); // P3: Đêm 1 = 240 s
   assert.equal(s.night, 1);
   assert.equal(s.motes_active, 20);
   assert.equal(new Set(s.motes.map((m) => m.pos.join())).size, 20, '20 điểm khác nhau');
@@ -64,7 +64,7 @@ test('R3: không nhặt khi đầy 10; đi tới đom đóm thì nhặt đúng t
   assert.equal(r.ev('mote_picked')[0].tick, 22);
 });
 
-test('R4: nạp đủ 10 → lantern_lit; +10/đom đóm nạp, +100/đèn', () => {
+test('R4: nạp đủ 10 → lantern_lit; +5/đom đóm nạp (P3), +100 thắp lần đầu', () => {
   const r = run({
     ticks: 2,
     scenario: empty({ player: { carried: 10 }, lanterns: [{ id: 'L1', pos: [0, 0, 2] }] }),
@@ -74,10 +74,10 @@ test('R4: nạp đủ 10 → lantern_lit; +10/đom đóm nạp, +100/đèn', () 
     r.events.map((e) => [e.tick, e.name, e.data]),
     [
       [1, 'deposit', { lantern_id: 'L1', amount: 10, deposited: 10 }],
-      [1, 'lantern_lit', { lantern_id: 'L1' }],
+      [1, 'lantern_lit', { lantern_id: 'L1', relight: false }], // P3: thêm trường relight
     ],
   );
-  assert.equal(r.snapAt(1).score, 10 * S.per_mote + S.per_lantern);
+  assert.equal(r.snapAt(1).score, 10 * 5 + 100);
 });
 
 test('R4: nạp nhiều lần (đèn nhớ tiến độ), chỉ cạnh lên, ngoài 2.0 m thì không nạp', () => {
@@ -87,7 +87,7 @@ test('R4: nạp nhiều lần (đèn nhớ tiến độ), chỉ cạnh lên, ngo
     frames: [{ tick: 0, interact: true }],
   });
   assert.deepEqual(r.events.map((e) => e.data), [{ lantern_id: 'L1', amount: 3, deposited: 4 }]);
-  assert.equal(r.snapAt(1).score, 30);
+  assert.equal(r.snapAt(1).score, 15); // P3: +5 mỗi đom đóm nạp
   const far = run({
     ticks: 2,
     scenario: empty({ player: { carried: 10 }, lanterns: [{ id: 'L1', pos: [0, 0, 2.01] }] }),
@@ -120,27 +120,8 @@ test('R4: sự kiện ghi tick = k+1 cho input ở tick k', () => {
   assert.equal(r.events[0].tick, 121);
 });
 
-test('R5: thắp đèn cuối → thắng all_lit; đèn đặt sẵn lit không cộng điểm', () => {
-  const lit = ['L1', 'L2', 'L3', 'L4'].map((id) => ({ id, lit: true }));
-  const r = run({
-    ticks: 100,
-    scenario: empty({ player: { carried: 10 }, lanterns: [...lit, { id: 'L5', pos: [0, 0, 2] }] }),
-    frames: [{ tick: 0, interact: true }],
-  });
-  assert.deepEqual(r.ev('game_over')[0], { type: 'event', tick: 1, name: 'game_over', data: { result: 'won', reason: 'all_lit' } });
-  // 10×10 + 100 + floor(299.98)×2 + 3×50
-  assert.deepEqual(r.end, { type: 'end', ticks: 1, state: 'won', score: 100 + 100 + 598 + 150 });
-});
-
-test('R5/T3: thắng kể cả đúng tick hết giờ', () => {
-  const lit = ['L1', 'L2', 'L3', 'L4'].map((id) => ({ id, lit: true }));
-  const r = run({
-    ticks: 10,
-    scenario: empty({ time_left_s: 1 / 60, player: { carried: 10 }, lanterns: [...lit, { id: 'L5', pos: [0, 0, 2] }] }),
-    frames: [{ tick: 0, interact: true }],
-  });
-  assert.deepEqual(r.end, { type: 'end', ticks: 1, state: 'won', score: 100 + 100 + 0 + 150 });
-});
+// R5 (thắng ngay khi thắp hết đèn, reason all_lit) và R5/T3 (thắng đúng tick hết giờ do all_lit) đã BỊ XÓA ở Phase 3:
+// Ticket-03 §3 [THAY THẾ] luật thắng — không còn thắng sớm, all_lit không còn dùng. Test thay thế: P3-WIN-* trong tests/phase3.test.js.
 
 test('R6: Bóng Mực chạm → −1 lửa, rơi floor(n/2), bất tử 90 tick, bóng recoil', () => {
   const r = run({ ticks: 200, scenario: empty({ player: { carried: 5 }, shades: [{ id: 'S1', pos: [0.5, 1, 0] }] }) });

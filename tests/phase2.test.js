@@ -6,7 +6,7 @@ import { run, empty, near } from './helpers.js';
 test('T2: snapshot v1.1 có đủ trường mới', () => {
   const s = run({ night: 2, ticks: 0 }).snapAt(0);
   for (const k of ['night', 'wind', 'drifters', 'charms', 'motes']) assert.ok(k in s, k);
-  assert.deepEqual(Object.keys(s.player).sort(), ['carried', 'charm_s', 'dash_cd_s', 'flames', 'grounded', 'invuln', 'pos', 'pulse_cd_s', 'vel'].sort());
+  assert.deepEqual(Object.keys(s.player).sort(), ['capacity', 'carried', 'charm_s', 'dash_cd_s', 'flames', 'grounded', 'invuln', 'pos', 'pulse_cd_s', 'vel'].sort()); // P3: thêm capacity
   assert.deepEqual(s.wind, { active: false, dir_deg: null });
   assert.deepEqual(s.charms, [{ id: 'C1', available: true, respawn_s: 0 }]);
   assert.deepEqual(Object.keys(s.motes[0]).sort(), ['id', 'kind', 'pos', 'ttl_s']);
@@ -102,7 +102,7 @@ test('T9: Bóng Mực wander → chase (≤ 12) → wander (> 18); trạng thái
 test('T10: Đêm 2 — 6 đèn chuẩn, bục nhảy bắn sang đảo B (~1.4 s), cầu tre đi được', () => {
   const s0 = run({ night: 2, ticks: 0 }).snapAt(0);
   assert.deepEqual(s0.lanterns.map((l) => l.id), ['L1', 'L2', 'L3', 'L4', 'L5', 'L6']);
-  assert.equal(s0.time_left_s, 330);
+  assert.equal(s0.time_left_s, 270); // P3: Đêm 2 = 270 s
   const pad = run({ night: 2, ticks: 120, scenario: empty({ player: { pos: [20, 0, 18] } }) });
   const landed = pad.snaps.find((s) => s.tick > 5 && s.player.grounded);
   assert.ok(landed.tick >= 80 && landed.tick <= 90, `đáp ở tick ${landed.tick}`);

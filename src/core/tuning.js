@@ -1,4 +1,4 @@
-// Số liệu CHUẨN của Ticket-02 (Contract v1.1). Nguồn sự thật duy nhất; game.contract.json phải khớp.
+// Số liệu CHUẨN của Ticket-02 + Ticket-03 (Contract v1.2). Nguồn sự thật duy nhất; game.contract.json phải khớp.
 // Giả định bổ sung: docs/notes/phase-2.md (B1–B21).
 
 export const TUNING = Object.freeze({
@@ -10,9 +10,9 @@ export const TUNING = Object.freeze({
   interact_radius: 2.0,
   pulse_cost: 3,
   pulse_radius: 5,
-  night1_duration_s: 300,
-  night2_duration_s: 330,
-  night3_duration_s: 360,
+  night1_duration_s: 240,
+  night2_duration_s: 270,
+  night3_duration_s: 300,
   flames: 3,
   invuln_s: 1.5,
   hit_drop_ratio: 0.5,
@@ -26,12 +26,23 @@ export const TUNING = Object.freeze({
   dash_speed: 14,
   dash_duration_s: 0.2,
   dash_cooldown_s: 1.5,
+  fuel_max: 100,
+  fuel_decay_per_s: 1.0,
+  fuel_per_mote: 10,
+  relight_cost: 5,
+  win_ratio: 0.6,
+  drain_per_s: 5,
+  low_fuel_threshold: 30,
+  capacity_max: 20,
   score: Object.freeze({
-    per_mote: 10,
-    per_lantern: 100,
+    per_mote: 5, // mỗi đom đóm nạp (thắp mới, thắp lại, châm dầu)
+    per_lantern: 100, // thắp lần đầu
+    per_relight: 40,
     per_stun: 5,
-    per_second_left: 2,
+    per_stun_draining: 15,
+    per_second_left: 0, // Ticket-03: bỏ thưởng thời gian
     per_flame_left: 50,
+    per_lit_lantern_at_dawn: 50, // + floor(fuel)
   }),
 });
 
@@ -85,4 +96,10 @@ export const WORLD = Object.freeze({
   wind_every: 1800, // B13
   wind_ticks: 300,
   wind_speed: 2,
+  // Ticket-03: dầu tính bằng đơn vị nguyên 1/60 (1 đơn vị = 1/60 fuel)
+  fuel_units: 60,
+  capacity_per_light: 2,
+  drain_range: 2,
+  drain_to_chase: 6,
+  drain_event_every: 60,
 });

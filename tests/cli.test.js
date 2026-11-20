@@ -22,7 +22,7 @@ function file(name, content) {
 const base = (out) => ['--seed', '1', '--night', '1', '--ticks', '30', '--out', out];
 
 test('R15: game.contract.json khớp tuning thật của code', () => {
-  assert.equal(contract.contract_version, '1.1'); // P2: Ticket-02 nâng contract lên v1.1
+  assert.equal(contract.contract_version, '1.2'); // P3: Ticket-03 nâng contract lên v1.2
   assert.deepEqual(contract.tuning, JSON.parse(JSON.stringify(TUNING)));
 });
 

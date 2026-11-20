@@ -20,7 +20,7 @@ export const MAPS = {
   1: {
     night: 1,
     name: 'Đảo Bến',
-    duration_s: 300,
+    duration_s: 240,
     start: [0, 0, 0],
     shadeSpeed: 4,
     shadeEvery: 480,
@@ -40,7 +40,7 @@ export const MAPS = {
   2: {
     night: 2,
     name: 'Đảo Cau',
-    duration_s: 330,
+    duration_s: 270,
     start: [0, 0, 0],
     shadeSpeed: 4,
     shadeEvery: 420,
@@ -62,7 +62,7 @@ export const MAPS = {
   3: {
     night: 3,
     name: 'Đảo Chuông',
-    duration_s: 360,
+    duration_s: 300,
     start: [0, 0, -20], // B11
     shadeSpeed: 4.5,
     shadeEvery: 360,
