@@ -74,3 +74,16 @@ Viết **trước khi code**. Mọi con số dưới đây phải khớp `game.c
 | R15 | `game.contract.json` khớp tuning thật của code | Unit test so sánh |
 
 Lệnh kiểm chứng: `npm test` (unit + CLI) và `npm run verify` (chạy scenario, kiểm tra kỳ vọng, kiểm tra tất định, lưu output vào `docs/proof/phase-1/`).
+
+## 5. Đánh giá Phase 1
+
+| ID | Kết quả | Bằng chứng |
+|---|---|---|
+| R1–R13, R15 | **Đạt** | `npm test` 32/32 pass; `npm run verify` 9/9 PASS ([verify-report](../proof/phase-1/verify-report.md), [runs/](../proof/phase-1/runs/)) |
+| R11 tất định | **Đạt** | Mỗi scenario chạy 2 lần, cùng sha256; seed 7 ≠ seed 8 |
+| R14 GUI | **Đạt một phần (đã kiểm tự động màn mở đầu)** | [gui-start.png](../proof/phase-1/gui-start.png) chụp bằng Chrome headless: HUD, Mây đội nón lá có đèn, đom đóm, đèn L1. Chơi trọn từ đầu tới thắng/thua bằng tay: **người chơi cần tự xác nhận và quay lại** (chưa có ảnh màn thắng/thua) |
+| Harness | **Đạt** | Stop hook chặn khi test đỏ ([hook-blocks-red.txt](../proof/phase-1/hook-blocks-red.txt)); skill `verify`; CI Ubuntu + macOS |
+
+- **Phase trước bị hỏng?** Không áp dụng (Phase 1 là phase đầu).
+- **Rủi ro với test ẩn:** các giả định A2 (tỏa sáng tốn đom đóm), A6 (đom đóm rơi thì mất), A8 (chỉ đèn đã thắp mới có vùng an toàn), A11 (thưởng cuối màn chỉ khi thắng) là cách hiểu riêng của tôi. Nếu Ticket-02 làm rõ khác đi, cần đổi theo và sửa test kèm lý do.
+- **Cần chỉnh harness:** thêm vào CLAUDE.md dòng "máy dev là Windows: không dùng python/sed -i; dùng công cụ ghi file" (lỗi AI #2).

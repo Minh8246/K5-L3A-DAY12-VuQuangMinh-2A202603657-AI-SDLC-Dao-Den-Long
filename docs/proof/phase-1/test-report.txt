@@ -1,0 +1,40 @@
+✔ R15: game.contract.json khớp tuning thật của code (1.269ms)
+✔ R12: chạy hợp lệ → mã 0, ghi JSONL, dòng cuối end (65.6187ms)
+✔ R12: --snapshot-every và dạng --key=value (65.6723ms)
+✔ R12: inputs sai định dạng (JSON hỏng) → mã 2 + stderr (74.1707ms)
+✔ R12: inputs sai định dạng (thiếu frames) → mã 2 + stderr (58.7724ms)
+✔ R12: inputs sai định dạng (tick không tăng) → mã 2 + stderr (69.0775ms)
+✔ R12: inputs sai định dạng (move ngoài [-1,1]) → mã 2 + stderr (72.0186ms)
+✔ R12: inputs sai định dạng (nút không phải boolean) → mã 2 + stderr (110.5771ms)
+✔ R12: scenario sai định dạng → mã 2 (289.6925ms)
+✔ R12: thiếu tham số bắt buộc → mã khác 0 + stderr (59.6596ms)
+✔ R1: snapshot tick 0 — Mây ở gốc, 5 đèn, đang chơi, 300 s (2.251ms)
+✔ R2: di chuyển theo yaw camera, đúng player_speed, chuẩn hóa vector (5.3727ms)
+✔ R2: nhảy rời mặt đất rồi rơi về Y = 0 (0.7059ms)
+✔ R3: nhặt đom đóm trong pickup_radius (≤), không nhặt khi ngoài bán kính (0.3241ms)
+✔ R3: không nhặt khi đã đầy carry_capacity (0.2323ms)
+✔ R3: đi tới đom đóm thì nhặt ở đúng tick (0.5641ms)
+✔ R4: interact cạnh đèn → deposit + lantern_lit, điểm per_lantern (0.3653ms)
+✔ R4: nạp một phần, giữ nút không nạp lại (chỉ cạnh lên), ngoài interact_radius không nạp (0.5077ms)
+✔ R4: sự kiện ghi tick = k+1 cho input ở tick k (1.9437ms)
+✔ R5: thắp đèn cuối → thắng all_lit, điểm thưởng thời gian + ngọn lửa (0.4077ms)
+✔ R6: Bóng Mực chạm → mất 1 ngọn lửa, rơi floor(carried × ratio), bất tử invuln_s (1.7017ms)
+✔ R6: Bóng Mực đuổi theo Mây với shade_speed (0.9613ms)
+✔ R7: hết ngọn lửa → thua no_flames (0.28ms)
+✔ R8: tỏa sáng → choáng + đẩy Bóng Mực trong pulse_radius, tốn pulse_cost, có điểm (0.2138ms)
+✔ R8: choáng đúng pulse_stun_s rồi đuổi tiếp; hồi chiêu pulse_cooldown_s (3.5955ms)
+✔ R8: không đủ đom đóm thì không tỏa sáng được (0.1603ms)
+✔ R9: Bóng Mực không vào safe_radius của đèn đã thắp; Mây đứng trong vùng an toàn không bị chạm (4.885ms)
+✔ R9: đèn chưa thắp không tạo vùng an toàn (giả định A8) (2.3915ms)
+✔ R10: hết giờ → thua dawn; time_left_s = thời lượng − bước/60 (0.2608ms)
+✔ R11: tất định — cùng seed/scenario/inputs cho output giống hệt; khác seed thì khác (14.7548ms)
+✔ R11: sinh Bóng Mực theo chu kỳ có id tự sinh và sự kiện shade_spawned (1.9546ms)
+✔ R13: --ticks N chạy đúng N bước; snapshot mỗi `every` tick; dòng cuối là end; làm tròn 3 chữ số (0.3244ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 971.9771

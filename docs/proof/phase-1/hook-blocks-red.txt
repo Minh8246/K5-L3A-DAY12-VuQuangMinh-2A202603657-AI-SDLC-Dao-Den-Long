@@ -1,0 +1,6 @@
+$ echo '{"stop_hook_active":false}' | node scripts/hooks/stop-gate.js   # khi có 1 test đỏ
+Test đang ĐỎ — chưa được kết thúc. Sửa lỗi rồi chạy lại `npm test`.
+✖ tam thoi do de thu hook (1.2909ms)
+✖ failing tests:
+✖ tam thoi do de thu hook (1.2909ms)
+exit code = 2
