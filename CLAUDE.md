@@ -17,3 +17,4 @@ Game 3D (Three.js) + chế độ headless theo Test Contract. Yêu cầu gốc: 
 - Không bịa yêu cầu: mọi luật phải truy về PRD/ticket hoặc giả định đã ghi trong `docs/notes/`. Giả định mới → ghi vào notes trước.
 - Không sửa tay output trong `docs/proof/`, không viết test luôn đạt. Test bị yêu cầu mới làm sai → sửa/bỏ kèm lý do trong notes.
 - Commit nhỏ, mỗi commit một việc. Không commit `.env`, key.
+- Máy dev là Windows (Git Bash/PowerShell): không dùng `python`, hạn chế `sed -i`; sửa file bằng công cụ Edit/Write. Lệnh trong contract phải chạy được trên macOS/Linux.
