@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite preview --open",
     "headless": "node src/headless.js",
-    "test": "node --test tests/",
+    "test": "node --test",
     "verify": "node scripts/verify.js"
   },
   "dependencies": {
