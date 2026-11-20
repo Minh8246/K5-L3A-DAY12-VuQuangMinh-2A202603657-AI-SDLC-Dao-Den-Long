@@ -1,22 +1,29 @@
 {
   "name": "dao-den-long",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Đảo Đèn Lồng — game 3D (Day 12 AI SDLC lab)",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite --open",
     "build": "vite build",
-    "preview": "vite preview --open",
+    "start": "electron .",
+    "bench": "npm run build && electron . --bench --seed 42 --duration 30 --out bench.json",
+    "soak": "node --expose-gc --max-semi-space-size=1 src/soak.js --seed 7 --nights 10 --out soak.json",
     "headless": "node src/headless.js",
     "test": "node --test",
-    "verify": "node scripts/verify.js --phase 3"
+    "verify": "node scripts/verify.js --phase 4",
+    "preview": "vite preview --open"
   },
   "dependencies": {
     "three": "0.160.0"
   },
   "devDependencies": {
+    "electron": "33.2.1",
     "vite": "5.4.11"
-  }
+  },
+  "main": "electron/main.cjs"
 }
